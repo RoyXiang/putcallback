@@ -5,20 +5,20 @@ import "testing"
 func TestRenameFile(t *testing.T) {
 	var renamed, want string
 
-	renamed = RenameFile("[Lilith-Raws] Karakai Jouzu no Takagi-san S03 - 01 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4")
-	want = "[Lilith-Raws] Karakai Jouzu no Takagi-san III - 01 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4"
+	renamed = RenameFile("[Lilith-Raws] Karakai Jouzu no Takagi-san S03 - 01v2 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4")
+	want = "[Lilith-Raws] Karakai Jouzu no Takagi-san III - 01v2 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4"
 	if renamed != want {
 		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
 	}
 
-	renamed = RenameFile("[Nekomoe kissaten][Sono Bisque Doll wa Koi wo Suru][01][1080p][CHS].mp4")
-	want = "[Nekomoe kissaten] Sono Bisque Doll wa Koi wo Suru - 01 [1080p][CHS].mp4"
+	renamed = RenameFile("[Nekomoe kissaten][Sono Bisque Doll wa Koi wo Suru][01V2][1080p][CHS].mp4")
+	want = "[Nekomoe kissaten] Sono Bisque Doll wa Koi wo Suru - 01v2 [1080p][CHS].mp4"
 	if renamed != want {
 		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
 	}
 
 	renamed = RenameFile("[SBE][KAMEN RIDER REVICE][EP01][x264_AAC][1080P].mp4")
-	want = "[SBE] KAMEN RIDER REVICE - EP01 [x264_AAC][1080P].mp4"
+	want = "[SBE] KAMEN RIDER REVICE - 01 [x264_AAC][1080P].mp4"
 	if renamed != want {
 		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
 	}
