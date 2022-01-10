@@ -62,13 +62,13 @@ func moveFile(filename string) {
 	log.Printf("Moving file %s...", filename)
 
 	src := fmt.Sprintf("%s:%s", RemoteSource, filename)
-	dest := fmt.Sprintf("%s:%s", RemoteDestination, renameFile(filename))
+	dest := fmt.Sprintf("%s:%s", RemoteDestination, RenameFile(filename))
 	rcMoveTo(src, dest, "--transfers=1", "--checkers=2", "--multi-thread-streams=10", "--tpslimit=100", "--tpslimit-burst=100")
 
 	notification.Send(fmt.Sprintf("%s finished", filename))
 }
 
-func renameFile(filename string) string {
+func RenameFile(filename string) string {
 	matches := reFilename.FindStringSubmatch(filename)
 	if matches == nil {
 		return filename
