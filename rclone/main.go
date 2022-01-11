@@ -10,6 +10,8 @@ import (
 )
 
 var (
+	renamingStyle string
+
 	cmdEnv     []string
 	fileChan   chan string
 	folderChan chan string
@@ -26,6 +28,12 @@ func init() {
 		"RCLONE_USE_MMAP=true",
 	}
 	cmdEnv = append(os.Environ(), rcEnv...)
+
+	if os.Getenv("RENAMING_STYLE") == RenamingStyleTv {
+		renamingStyle = RenamingStyleTv
+	} else {
+		renamingStyle = RenamingStyleAnime
+	}
 
 	accessToken := parseRCloneConfig()
 	Put = putio.New(accessToken)
