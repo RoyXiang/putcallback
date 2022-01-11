@@ -11,8 +11,8 @@ func TestRenameFile(t *testing.T) {
 		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
 	}
 
-	renamed = RenameFile("[Nekomoe kissaten][Sono Bisque Doll wa Koi wo Suru][01][1080p][CHS].mp4")
-	want = "[Nekomoe kissaten] Sono Bisque Doll wa Koi wo Suru - 01 [1080p][CHS].mp4"
+	renamed = RenameFile("[Nekomoe kissaten][Sono Bisque Doll wa Koi wo Suru][10.5(OVA)][1080p][CHS].mp4")
+	want = "[Nekomoe kissaten] Sono Bisque Doll wa Koi wo Suru - S10.5 [1080p][CHS].mp4"
 	if renamed != want {
 		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
 	}

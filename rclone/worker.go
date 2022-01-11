@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	reFilename = regexp.MustCompile(`^(\[.+?])[\[ ](.+?)[] ]?-?[\[ ](?:EP)?([0-9]{1,3})(?:[vV]([0-9]))?[] ]((?:\[?END[] ])?[\[(].*)$`)
+	reFilename = regexp.MustCompile(`^(\[.+?])[\[ ](.+?)[] ]?-?[\[ ](E|EP|SP)?([0-9]{1,3}(?:\.[0-9])?)(?:[vV]([0-9]))?(?:\((OAD|OVA)\))?[] ]((?:\[?END[] ])?[\[(].*)$`)
 	reSeason   = regexp.MustCompile(`^S?([0-9]+)$`)
 	reDigits   = regexp.MustCompile(`(\b|-)[0-9]+(\b|-)`)
 	romanLib   = roman.NewRoman()
@@ -97,11 +97,15 @@ func RenameFile(filename string) string {
 	}
 	name := strings.Join(elems[:i], " ")
 
-	var episode string
-	if matches[4] == "" {
-		episode = matches[3]
-	} else {
-		episode = fmt.Sprintf("%sv%s", matches[3], matches[4])
+	var prefix string
+	if matches[3] == "SP" || matches[6] != "" {
+		prefix = "S"
 	}
-	return fmt.Sprintf("%s %s - %s %s", matches[1], name, episode, matches[5])
+	var episode string
+	if matches[5] == "" {
+		episode = fmt.Sprintf("%s%s", prefix, matches[4])
+	} else {
+		episode = fmt.Sprintf("%s%sv%s", prefix, matches[4], matches[5])
+	}
+	return fmt.Sprintf("%s %s - %s %s", matches[1], name, episode, matches[7])
 }
