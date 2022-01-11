@@ -1,7 +1,10 @@
 package rclone
 
 const (
-	RemoteSource      = "src"
-	RemoteDestination = "dest"
-	ErrorTemporary    = 5
+	RemoteSource       = "src"
+	RemoteDestination  = "dest"
+	RenamingStyleAnime = "anime"
+	RenamingStyleTv    = "tv"
+	RenamingStyleNone  = "none"
+	ErrorTemporary     = 5
 )

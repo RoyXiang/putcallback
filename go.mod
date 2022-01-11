@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/chonla/roman-number-go v0.0.0-20181101035413-6768129de021
+	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/gregdel/pushover v1.1.0
 	github.com/putdotio/go-putio v1.6.0
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d

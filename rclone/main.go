@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/RoyXiang/putcallback/putio"
 )
 
 var (
+	renamingStyle string
+
 	cmdEnv     []string
 	fileChan   chan string
 	folderChan chan string
@@ -26,6 +29,15 @@ func init() {
 		"RCLONE_USE_MMAP=true",
 	}
 	cmdEnv = append(os.Environ(), rcEnv...)
+
+	styleInEnv := strings.ToLower(os.Getenv("RENAMING_STYLE"))
+	if styleInEnv == RenamingStyleAnime {
+		renamingStyle = RenamingStyleAnime
+	} else if styleInEnv == RenamingStyleTv {
+		renamingStyle = RenamingStyleTv
+	} else {
+		renamingStyle = RenamingStyleNone
+	}
 
 	accessToken := parseRCloneConfig()
 	Put = putio.New(accessToken)
