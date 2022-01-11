@@ -14,7 +14,7 @@ import (
 var (
 	reFilename = regexp.MustCompile(`^(\[.+?])[\[ ](.+?)[] ]?-?[\[ ](?:EP)?([0-9]{1,3})(?:[vV]([0-9]))?[] ]((?:\[?END[] ])?[\[(].*)$`)
 	reSeason   = regexp.MustCompile(`^S?([0-9]+)$`)
-	reNumber   = regexp.MustCompile(`(\b|[ -])[0-9]+(\b|[ -])`)
+	reDigits   = regexp.MustCompile(`(\b|-)[0-9]+(\b|-)`)
 	romanLib   = roman.NewRoman()
 )
 
@@ -88,7 +88,7 @@ func RenameFile(filename string) string {
 	}
 	i := 0
 	for _, elem := range elems {
-		elem = reNumber.ReplaceAllString(elem, "")
+		elem = reDigits.ReplaceAllString(elem, "")
 		elem = strings.Trim(elem, "-")
 		if elem != "" && elem != "()" {
 			elems[i] = elem
