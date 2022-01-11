@@ -46,4 +46,16 @@ func TestRenameFile(t *testing.T) {
 	if renamed != want {
 		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
 	}
+
+	renamed = RenameFile("[Kawaiika-Raws] Kobayashi-san (2021) 01 [BDRip 1920x1080 HEVC FLAC].mkv")
+	want = "[Kawaiika-Raws] Kobayashi-san - 01 [BDRip 1920x1080 HEVC FLAC].mkv"
+	if renamed != want {
+		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
+	}
+
+	renamed = RenameFile("[GM-Team][国漫][Dou Luo Da Lu][Douro Mainland][2019][190][AVC][GB][1080P].mp4")
+	want = "[GM-Team] 国漫 Dou Luo Da Lu Douro Mainland - 190 [AVC][GB][1080P].mp4"
+	if renamed != want {
+		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
+	}
 }
