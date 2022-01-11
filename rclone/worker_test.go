@@ -11,20 +11,20 @@ func TestRenameFile(t *testing.T) {
 		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
 	}
 
-	renamed = RenameFile("[Nekomoe kissaten][Sono Bisque Doll wa Koi wo Suru][01V2][1080p][CHS].mp4")
-	want = "[Nekomoe kissaten] Sono Bisque Doll wa Koi wo Suru - 01v2 [1080p][CHS].mp4"
+	renamed = RenameFile("[Nekomoe kissaten][Sono Bisque Doll wa Koi wo Suru][01][1080p][CHS].mp4")
+	want = "[Nekomoe kissaten] Sono Bisque Doll wa Koi wo Suru - 01 [1080p][CHS].mp4"
 	if renamed != want {
 		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
 	}
 
-	renamed = RenameFile("[SBE][KAMEN RIDER REVICE][EP01][x264_AAC][1080P].mp4")
-	want = "[SBE] KAMEN RIDER REVICE - 01 [x264_AAC][1080P].mp4"
+	renamed = RenameFile("[SBE][KAMEN RIDER REVICE][EP01V2][x264_AAC][1080P].mp4")
+	want = "[SBE] KAMEN RIDER REVICE - 01v2 [x264_AAC][1080P].mp4"
 	if renamed != want {
 		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
 	}
 
-	renamed = RenameFile("[Ohys-Raws] Shingeki no Kyojin The Final Season Part 2 - 01 (NHKG 1280x720 x264 AAC JP).mp4")
-	want = "[Ohys-Raws] Shingeki no Kyojin The Final Season Part II - 01 (NHKG 1280x720 x264 AAC JP).mp4"
+	renamed = RenameFile("[Ohys-Raws] Shingeki no Kyojin The Final Season Part 2 - 12 END (NHKG 1280x720 x264 AAC JP).mp4")
+	want = "[Ohys-Raws] Shingeki no Kyojin The Final Season Part II - 12 END (NHKG 1280x720 x264 AAC JP).mp4"
 	if renamed != want {
 		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
 	}

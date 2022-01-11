@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	reFilename = regexp.MustCompile(`^(\[.+])[\[ ](.+?)[] ]?[ -]*[\[ ](?:EP)?([0-9]+)(?:[vV]([0-9]+))?[] ]([\[(].*)$`)
+	reFilename = regexp.MustCompile(`^(\[.+])[\[ ](.+?)[] ]?-?[\[ ](?:EP)?([0-9]+)(?:[vV]([0-9]{1,3}))?[] ]((\[?END[] ])?[\[(].*)$`)
 	reSeason   = regexp.MustCompile(` S?(\d+)$`)
 	romanLib   = roman.NewRoman()
 )
