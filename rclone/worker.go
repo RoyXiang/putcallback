@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	reFilename = regexp.MustCompile(`^(\[.+])[\[ ](.+?)[] ]?-?[\[ ](?:EP)?([0-9]+)(?:[vV]([0-9]{1,3}))?[] ]((\[?END[] ])?[\[(].*)$`)
-	reSeason   = regexp.MustCompile(` S?(\d+)$`)
+	reFilename = regexp.MustCompile(`^(\[.+])[\[ ](.+?)[] ]?-?[\[ ](?:EP)?([0-9]+)(?:[vV]([0-9]{1,3}))?[] ]((?:\[?END[] ])?[\[(].*)$`)
+	reSeason   = regexp.MustCompile(`^S?([0-9]+)$`)
+	reNumber   = regexp.MustCompile(`[0-9]+`)
 	romanLib   = roman.NewRoman()
 )
 
@@ -73,18 +74,28 @@ func RenameFile(filename string) string {
 	if matches == nil {
 		return filename
 	}
-	mSeason := reSeason.FindStringSubmatch(matches[2])
-	if mSeason != nil {
-		season, _ := strconv.Atoi(mSeason[1])
-		parts := strings.Split(matches[2], " ")
-		parts[len(parts)-1] = romanLib.ToRoman(season)
-		matches[2] = strings.Join(parts, " ")
+
+	elems := strings.Split(matches[2], " ")
+	if matches := reSeason.FindStringSubmatch(elems[len(elems)-1]); matches != nil {
+		season, _ := strconv.Atoi(matches[1])
+		elems[len(elems)-1] = romanLib.ToRoman(season)
 	}
+	i := 0
+	for _, elem := range elems {
+		elem = reNumber.ReplaceAllString(elem, "")
+		elem = strings.Trim(elem, "-")
+		if elem != "" {
+			elems[i] = elem
+			i++
+		}
+	}
+	name := strings.Join(elems[:i], " ")
+
 	var episode string
 	if matches[4] == "" {
 		episode = matches[3]
 	} else {
 		episode = fmt.Sprintf("%sv%s", matches[3], matches[4])
 	}
-	return fmt.Sprintf("%s %s - %s %s", matches[1], matches[2], episode, matches[5])
+	return fmt.Sprintf("%s %s - %s %s", matches[1], name, episode, matches[5])
 }

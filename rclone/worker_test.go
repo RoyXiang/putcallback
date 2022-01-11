@@ -34,4 +34,16 @@ func TestRenameFile(t *testing.T) {
 	if renamed != want {
 		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
 	}
+
+	renamed = RenameFile("[Lilith-Raws] 86 - Eighty Six - 01 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4")
+	want = "[Lilith-Raws] Eighty Six - 01 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4"
+	if renamed != want {
+		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
+	}
+
+	renamed = RenameFile("[Lilith-Raws] Tokyo 24-ku - 01 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4")
+	want = "[Lilith-Raws] Tokyo ku - 01 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4"
+	if renamed != want {
+		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
+	}
 }
