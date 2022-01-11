@@ -5,5 +5,6 @@ const (
 	RemoteDestination  = "dest"
 	RenamingStyleAnime = "anime"
 	RenamingStyleTv    = "tv"
+	RenamingStyleNone  = "none"
 	ErrorTemporary     = 5
 )

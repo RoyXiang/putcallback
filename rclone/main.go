@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/RoyXiang/putcallback/putio"
@@ -29,10 +30,13 @@ func init() {
 	}
 	cmdEnv = append(os.Environ(), rcEnv...)
 
-	if os.Getenv("RENAMING_STYLE") == RenamingStyleTv {
+	styleInEnv := strings.ToLower(os.Getenv("RENAMING_STYLE"))
+	if styleInEnv == RenamingStyleAnime {
+		renamingStyle = RenamingStyleAnime
+	} else if styleInEnv == RenamingStyleTv {
 		renamingStyle = RenamingStyleTv
 	} else {
-		renamingStyle = RenamingStyleAnime
+		renamingStyle = RenamingStyleNone
 	}
 
 	accessToken := parseRCloneConfig()

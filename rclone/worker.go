@@ -63,10 +63,13 @@ func moveFile(filename string) {
 	log.Printf("Moving file %s...", filename)
 
 	var newFilename string
-	if renamingStyle == RenamingStyleAnime {
+	switch renamingStyle {
+	case RenamingStyleAnime:
 		newFilename = RenameFileInAnimeStyle(filename)
-	} else {
+	case RenamingStyleTv:
 		newFilename = RenameFileInTvStyle(filename)
+	default:
+		newFilename = filename
 	}
 
 	src := fmt.Sprintf("%s:%s", RemoteSource, filename)
