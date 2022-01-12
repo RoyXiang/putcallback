@@ -28,7 +28,10 @@ func SendFileIdToWorker(fileId int64) {
 		return
 	}
 	go Put.CleanupTransfers()
-	if fileInfo.IsDir {
+
+	if !strings.HasPrefix(fileInfo.FullPath, Put.DefaultDownloadFolder) {
+		notification.Send(fmt.Sprintf("%s downloaded", fileInfo.Name))
+	} else if fileInfo.IsDir {
 		folderChan <- fileInfo
 	} else {
 		fileChan <- fileInfo
@@ -54,7 +57,7 @@ func moveFolder(folderChan <-chan *putio.FileInfo) {
 		rcMove(src, dest, "--transfers=5", "--checkers=10", "--multi-thread-streams=10", "--min-size=250M", "--tpslimit=100", "--tpslimit-burst=100")
 		rcRemoveDir(src)
 
-		notification.Send(fmt.Sprintf("%s finished", folder.Name))
+		notification.Send(fmt.Sprintf("%s moved", folder.Name))
 	}
 }
 
@@ -77,7 +80,11 @@ func moveFile(file *putio.FileInfo) {
 	dest := fmt.Sprintf("%s:%s", RemoteDestination, newFilename)
 	rcMoveTo(src, dest, "--transfers=1", "--checkers=2", "--multi-thread-streams=10", "--tpslimit=100", "--tpslimit-burst=100")
 
-	notification.Send(fmt.Sprintf("%s finished", file.Name))
+	if file.Name == newFilename {
+		notification.Send(fmt.Sprintf("%s moved", file.Name))
+	} else {
+		notification.Send(fmt.Sprintf("%s moved and renamed", file.Name))
+	}
 }
 
 func ParseEpisodeInfo(filename string) *EpisodeInfo {

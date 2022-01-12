@@ -14,7 +14,10 @@ func (put *Put) GetFileInfo(id int64) *FileInfo {
 	fullPath := file.Name
 	folderId := file.ParentID
 	for folderId != RootFolderId {
-		folder, _ := put.Client.Files.Get(ctx, folderId)
+		folder, err := put.Client.Files.Get(ctx, folderId)
+		if err != nil {
+			return nil
+		}
 		fullPath = fmt.Sprintf("%s/%s", folder.Name, fullPath)
 		folderId = folder.ParentID
 	}
