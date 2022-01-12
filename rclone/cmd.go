@@ -18,13 +18,14 @@ func rcDumpConfig() map[string]RemoteConfig {
 	return config
 }
 
-func rcMove(src, dest string, arg ...string) {
+func rcMoveDir(src, dest string, arg ...string) {
+	defer wgFolder.Done()
 	args := []string{"move", src, dest}
 	args = append(args, arg...)
 	rcExecCmd(args...)
 }
 
-func rcMoveTo(src, dest string, arg ...string) {
+func rcMoveFile(src, dest string, arg ...string) {
 	args := []string{"moveto", src, dest}
 	args = append(args, arg...)
 	rcExecCmd(args...)

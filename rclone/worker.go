@@ -53,10 +53,13 @@ func moveFolder(folderChan <-chan *putio.FileInfo) {
 
 		src := fmt.Sprintf("%s:%s", RemoteSource, folder.FullPath)
 		dest := fmt.Sprintf("%s:%s", RemoteDestination, folder.Name)
-		rcMove(src, dest, "--transfers=20", "--checkers=30", "--max-size=250M")
-		rcMove(src, dest, "--transfers=5", "--checkers=10", "--multi-thread-streams=10", "--min-size=250M", "--tpslimit=100", "--tpslimit-burst=100")
-		rcRemoveDir(src)
 
+		wgFolder.Add(2)
+		go rcMoveDir(src, dest, "--transfers=8", "--checkers=16", "--min-size=250M")
+		go rcMoveDir(src, dest, "--transfers=128", "--checkers=128", "--max-size=250M")
+		wgFolder.Wait()
+
+		rcRemoveDir(src)
 		notification.Send(fmt.Sprintf("%s moved", folder.Name))
 	}
 }
@@ -78,7 +81,7 @@ func moveFile(file *putio.FileInfo) {
 
 	src := fmt.Sprintf("%s:%s", RemoteSource, file.FullPath)
 	dest := fmt.Sprintf("%s:%s", RemoteDestination, newFilename)
-	rcMoveTo(src, dest, "--transfers=1", "--checkers=2", "--multi-thread-streams=10", "--tpslimit=100", "--tpslimit-burst=100")
+	rcMoveFile(src, dest, "--transfers=1", "--checkers=2")
 
 	if file.Name == newFilename {
 		notification.Send(fmt.Sprintf("%s moved", file.Name))

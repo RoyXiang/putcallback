@@ -18,13 +18,16 @@ var (
 	folderChan chan *putio.FileInfo
 	mu         sync.Mutex
 	wg         sync.WaitGroup
+	wgFolder   sync.WaitGroup
 
 	Put *putio.Put
 )
 
 func init() {
 	rcEnv := []string{
+		"RCLONE_CHECK_FIRST=true",
 		"RCLONE_DELETE_EMPTY_SRC_DIRS=true",
+		"RCLONE_DRIVE_PACER_MIN_SLEEP=1ms",
 		"RCLONE_NO_TRAVERSE=true",
 		"RCLONE_USE_MMAP=true",
 	}
