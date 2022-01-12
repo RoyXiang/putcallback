@@ -66,14 +66,14 @@ func moveFile(file *putio.FileInfo) {
 
 	log.Printf("Moving file %s...", file.Name)
 
-	var newFilename string
-	switch renamingStyle {
-	case RenamingStyleAnime:
-		newFilename = RenameFileInAnimeStyle(file.Name)
-	case RenamingStyleTv:
-		newFilename = RenameFileInTvStyle(file.Name)
-	default:
-		newFilename = file.Name
+	newFilename := file.Name
+	if strings.HasPrefix(file.ContentType, putio.ContentTypeVideo) {
+		switch renamingStyle {
+		case RenamingStyleAnime:
+			newFilename = RenameFileInAnimeStyle(file.Name)
+		case RenamingStyleTv:
+			newFilename = RenameFileInTvStyle(file.Name)
+		}
 	}
 
 	src := fmt.Sprintf("%s:%s", RemoteSource, file.FullPath)

@@ -1,7 +1,8 @@
 package putio
 
 const (
-	RootFolderId  = 0
-	Ongoing       = "ING"
-	StatusSeeding = "SEEDING"
+	RootFolderId     = 0
+	ContentTypeVideo = "video/"
+	Ongoing          = "ING"
+	StatusSeeding    = "SEEDING"
 )

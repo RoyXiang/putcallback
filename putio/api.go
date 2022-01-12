@@ -22,8 +22,9 @@ func (put *Put) GetFileInfo(id int64) *FileInfo {
 		folderId = folder.ParentID
 	}
 	return &FileInfo{
-		Name:     file.Name,
-		IsDir:    file.IsDir(),
-		FullPath: fullPath,
+		Name:        file.Name,
+		IsDir:       file.IsDir(),
+		FullPath:    fullPath,
+		ContentType: file.ContentType,
 	}
 }
