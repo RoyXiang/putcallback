@@ -13,3 +13,9 @@ type Put struct {
 }
 
 type SortedTransfers []put.Transfer
+
+type FileInfo struct {
+	Name     string
+	IsDir    bool
+	FullPath string
+}

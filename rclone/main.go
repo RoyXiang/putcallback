@@ -14,8 +14,8 @@ var (
 	renamingStyle string
 
 	cmdEnv     []string
-	fileChan   chan string
-	folderChan chan string
+	fileChan   chan *putio.FileInfo
+	folderChan chan *putio.FileInfo
 	mu         sync.Mutex
 	wg         sync.WaitGroup
 
@@ -42,8 +42,8 @@ func init() {
 	accessToken := parseRCloneConfig()
 	Put = putio.New(accessToken)
 
-	fileChan = make(chan string, 1)
-	folderChan = make(chan string, Put.MaxTransfers)
+	fileChan = make(chan *putio.FileInfo, 1)
+	folderChan = make(chan *putio.FileInfo, Put.MaxTransfers)
 	wg.Add(2)
 	go worker(fileChan)
 	go moveFolder(folderChan)

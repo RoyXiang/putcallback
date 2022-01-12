@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/RoyXiang/putcallback/notification"
+	"github.com/RoyXiang/putcallback/putio"
 	"github.com/chonla/roman-number-go"
 )
 
@@ -22,61 +23,61 @@ func SendFileIdToWorker(fileId int64) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	name, isDir := Put.GetFileInfo(fileId)
-	if name == "" {
+	fileInfo := Put.GetFileInfo(fileId)
+	if fileInfo == nil {
 		return
 	}
 	go Put.CleanupTransfers()
-	if isDir {
-		folderChan <- name
+	if fileInfo.IsDir {
+		folderChan <- fileInfo
 	} else {
-		fileChan <- name
+		fileChan <- fileInfo
 	}
 }
 
-func worker(fileChan <-chan string) {
+func worker(fileChan <-chan *putio.FileInfo) {
 	defer wg.Done()
-	for filename := range fileChan {
+	for fileInfo := range fileChan {
 		wg.Add(1)
-		go moveFile(filename)
+		go moveFile(fileInfo)
 	}
 }
 
-func moveFolder(folderChan <-chan string) {
+func moveFolder(folderChan <-chan *putio.FileInfo) {
 	defer wg.Done()
 	for folder := range folderChan {
-		log.Printf("Moving folder %s...", folder)
+		log.Printf("Moving folder %s...", folder.Name)
 
-		src := fmt.Sprintf("%s:%s", RemoteSource, folder)
-		dest := fmt.Sprintf("%s:%s", RemoteDestination, folder)
+		src := fmt.Sprintf("%s:%s", RemoteSource, folder.FullPath)
+		dest := fmt.Sprintf("%s:%s", RemoteDestination, folder.Name)
 		rcMove(src, dest, "--transfers=20", "--checkers=30", "--max-size=250M")
 		rcMove(src, dest, "--transfers=5", "--checkers=10", "--multi-thread-streams=10", "--min-size=250M", "--tpslimit=100", "--tpslimit-burst=100")
 		rcRemoveDir(src)
 
-		notification.Send(fmt.Sprintf("%s finished", folder))
+		notification.Send(fmt.Sprintf("%s finished", folder.Name))
 	}
 }
 
-func moveFile(filename string) {
+func moveFile(file *putio.FileInfo) {
 	defer wg.Done()
 
-	log.Printf("Moving file %s...", filename)
+	log.Printf("Moving file %s...", file.Name)
 
 	var newFilename string
 	switch renamingStyle {
 	case RenamingStyleAnime:
-		newFilename = RenameFileInAnimeStyle(filename)
+		newFilename = RenameFileInAnimeStyle(file.Name)
 	case RenamingStyleTv:
-		newFilename = RenameFileInTvStyle(filename)
+		newFilename = RenameFileInTvStyle(file.Name)
 	default:
-		newFilename = filename
+		newFilename = file.Name
 	}
 
-	src := fmt.Sprintf("%s:%s", RemoteSource, filename)
+	src := fmt.Sprintf("%s:%s", RemoteSource, file.FullPath)
 	dest := fmt.Sprintf("%s:%s", RemoteDestination, newFilename)
 	rcMoveTo(src, dest, "--transfers=1", "--checkers=2", "--multi-thread-streams=10", "--tpslimit=100", "--tpslimit-burst=100")
 
-	notification.Send(fmt.Sprintf("%s finished", filename))
+	notification.Send(fmt.Sprintf("%s finished", file.Name))
 }
 
 func ParseEpisodeInfo(filename string) *EpisodeInfo {
