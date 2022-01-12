@@ -26,6 +26,6 @@ go install github.com/RoyXiang/putcallback@latest
    * `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`
        * If these two are set, a notification would be sent through Telegram bot after files transferred to `dest`.
 2. Run the program. Set it up as a service by any means, e.g. systemd, nohup, supervisor, etc.
-3. Make it accessible from outside. The program listens on `:1080` by default, set up a proxy to that port.
+3. Make it accessible from outside. The program listens on `:1880` by default, set up a proxy to that port.
 4. Set up callback URL on [Settings](https://app.put.io/settings/preferences) page,
    e.g. `https://example.com/putio/callback`
