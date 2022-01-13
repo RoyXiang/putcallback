@@ -15,6 +15,7 @@ import (
 var (
 	reFilename = regexp.MustCompile(`^(\[.+?])[\[ ](.+?)[] ]?-?[\[ ](E|EP|SP)?([0-9]{1,3}(?:\.[0-9])?)(?:[vV]([0-9]))?(?:\((OAD|OVA)\))?[] ]((?:\[?END[] ])?[\[(].*)$`)
 	reSeason   = regexp.MustCompile(`^S?([0-9]+)$`)
+	reOrdinal  = regexp.MustCompile(`^([0-9]+)(?:ST|ND|RD|TH)$`)
 	reDigits   = regexp.MustCompile(`(\b|-)[0-9]+(\b|-)`)
 	romanLib   = roman.NewRoman()
 )
@@ -102,7 +103,6 @@ func ParseEpisodeInfo(filename string) *EpisodeInfo {
 		Episode: matches[4],
 		Extra:   matches[7],
 	}
-
 	if matches[5] != "" {
 		info.Version, _ = strconv.Atoi(matches[5])
 	} else {
@@ -113,17 +113,32 @@ func ParseEpisodeInfo(filename string) *EpisodeInfo {
 		return r == ' ' || r == '[' || r == ']'
 	})
 	lenElems := len(elems)
-	if matches := reSeason.FindStringSubmatch(elems[lenElems-1]); matches != nil {
-		season, _ := strconv.Atoi(matches[1])
-		if lenElems >= 2 && strings.ToLower(elems[lenElems-2]) == "part" {
-			elems[lenElems-1] = romanLib.ToRoman(season)
-		} else if season < 100 {
-			info.Season = season
-			elems = elems[:lenElems-1]
-		}
+	var lastElem, secondLastElem string
+	lastElem = strings.ToUpper(elems[lenElems-1])
+	if len(elems) >= 2 {
+		secondLastElem = strings.ToUpper(elems[lenElems-2])
 	}
+
 	if matches[3] == "SP" || matches[6] != "" {
 		info.Season = 0
+	} else if lastElem == "SEASON" {
+		if matches := reOrdinal.FindStringSubmatch(secondLastElem); matches != nil {
+			season, _ := strconv.Atoi(matches[1])
+			if season < 100 {
+				info.Season = season
+				elems = elems[:lenElems-2]
+			}
+		}
+	} else if matches := reSeason.FindStringSubmatch(lastElem); matches != nil {
+		season, _ := strconv.Atoi(matches[1])
+		if season < 100 {
+			info.Season = season
+			if secondLastElem == "PART" {
+				elems = elems[:lenElems-2]
+			} else {
+				elems = elems[:lenElems-1]
+			}
+		}
 	}
 	info.Show = strings.Join(elems, " ")
 	return info
