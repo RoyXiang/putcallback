@@ -42,6 +42,7 @@ func init() {
 }
 
 func Send(message string) {
+	log.Print(message)
 	if pushoverApp != nil {
 		msg := &pushover.Message{
 			Title:     "Put.io",

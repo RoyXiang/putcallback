@@ -19,6 +19,7 @@ func handleCallback(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			return
 		}
+		log.Printf("Callback received (file_id: %d, name: %s)", id, r.FormValue("name"))
 		go rclone.SendFileIdToWorker(id)
 	}
 
