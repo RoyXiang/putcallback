@@ -31,10 +31,6 @@ func rcMoveFile(src, dest string, arg ...string) {
 	rcExecCmd(args...)
 }
 
-func rcRemoveDir(dir string) {
-	rcExecCmd("rmdir", dir)
-}
-
 func rcExecCmd(args ...string) {
 	cmd := exec.Command("rclone", args...)
 	cmd.Env = cmdEnv

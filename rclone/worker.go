@@ -56,11 +56,12 @@ func moveFolder(folderChan <-chan *putio.FileInfo) {
 		dest := fmt.Sprintf("%s:%s", RemoteDestination, folder.Name)
 
 		wgFolder.Add(2)
+		rcExecCmd("mkdir", dest)
 		go rcMoveDir(src, dest, "--transfers=8", "--checkers=16", "--min-size=250M")
 		go rcMoveDir(src, dest, "--transfers=128", "--checkers=128", "--max-size=250M")
 		wgFolder.Wait()
 
-		rcRemoveDir(src)
+		rcExecCmd("rmdir", src)
 		notification.Send(fmt.Sprintf("%s moved", folder.Name))
 	}
 }
