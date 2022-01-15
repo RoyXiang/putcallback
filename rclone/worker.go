@@ -57,8 +57,8 @@ func moveFolder(folderChan <-chan *putio.FileInfo) {
 
 		wgFolder.Add(2)
 		rcExecCmd("mkdir", dest)
-		go rcMoveDir(src, dest, "--transfers=8", "--checkers=16", "--min-size=250M")
-		go rcMoveDir(src, dest, "--transfers=128", "--checkers=128", "--max-size=250M")
+		go rcMoveDir(src, dest, "--transfers=4", "--checkers=8", "--min-size=250M")
+		go rcMoveDir(src, dest, "--transfers=8", "--checkers=16", "--max-size=250M")
 		wgFolder.Wait()
 
 		rcExecCmd("rmdir", src)
