@@ -57,8 +57,8 @@ func moveFolder(folderChan <-chan *putio.FileInfo) {
 
 		wgFolder.Add(2)
 		rcExecCmd("mkdir", dest)
-		go rcMoveDir(src, dest, "--transfers=4", "--checkers=8", "--min-size=250M")
-		go rcMoveDir(src, dest, "--transfers=8", "--checkers=16", "--max-size=250M")
+		go rcMoveDir(src, dest, largeFileArgs...)
+		go rcMoveDir(src, dest, smallFileArgs...)
 		wgFolder.Wait()
 
 		rcExecCmd("rmdir", src)
@@ -83,7 +83,7 @@ func moveFile(file *putio.FileInfo) {
 
 	src := fmt.Sprintf("%s:%s", RemoteSource, file.FullPath)
 	dest := fmt.Sprintf("%s:%s", RemoteDestination, newFilename)
-	rcMoveFile(src, dest, "--transfers=1", "--checkers=2")
+	rcMoveFile(src, dest)
 
 	if file.Name == newFilename {
 		notification.Send(fmt.Sprintf("%s moved", file.Name))

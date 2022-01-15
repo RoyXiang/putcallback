@@ -2,18 +2,23 @@ package rclone
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"strings"
 	"sync"
 
 	"github.com/RoyXiang/putcallback/putio"
+	"github.com/rclone/rclone/fs"
 )
 
 var (
 	renamingStyle string
 
-	cmdEnv     []string
+	cmdArgs       []string
+	largeFileArgs []string
+	smallFileArgs []string
+
 	fileChan   chan *putio.FileInfo
 	folderChan chan *putio.FileInfo
 	mu         sync.Mutex
@@ -24,14 +29,24 @@ var (
 )
 
 func init() {
-	rcEnv := []string{
-		"RCLONE_CHECK_FIRST=true",
-		"RCLONE_DELETE_EMPTY_SRC_DIRS=true",
-		"RCLONE_DRIVE_PACER_MIN_SLEEP=1ms",
-		"RCLONE_NO_TRAVERSE=true",
-		"RCLONE_USE_MMAP=true",
+	cmdArgs = []string{
+		"--check-first",
+		"--delete-empty-src-dirs",
+		"--no-traverse",
+		"--use-mmap",
+		"--drive-pacer-min-sleep=1ms",
 	}
-	cmdEnv = append(os.Environ(), rcEnv...)
+	rcGlobalConfig := fs.GetConfig(nil)
+	largeFileArgs = []string{
+		fmt.Sprintf("--transfers=%d", rcGlobalConfig.Transfers),
+		fmt.Sprintf("--checkers=%d", rcGlobalConfig.Checkers),
+		fmt.Sprintf("--min-size=%db", rcGlobalConfig.MultiThreadCutoff),
+	}
+	smallFileArgs = []string{
+		fmt.Sprintf("--transfers=%d", rcGlobalConfig.Transfers*2),
+		fmt.Sprintf("--checkers=%d", rcGlobalConfig.Checkers*2),
+		fmt.Sprintf("--max-size=%db", rcGlobalConfig.MultiThreadCutoff-1),
+	}
 
 	styleInEnv := strings.ToLower(os.Getenv("RENAMING_STYLE"))
 	if styleInEnv == RenamingStyleAnime {
