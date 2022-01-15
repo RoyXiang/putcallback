@@ -24,16 +24,17 @@ func rcMoveDir(src, dest string, arg ...string) {
 	defer wgFolder.Done()
 	args := []string{"move", src, dest}
 	args = append(args, arg...)
+	args = append(args, moveArgs...)
 	rcExecCmd(args...)
 }
 
 func rcMoveFile(src, dest string) {
 	args := []string{"moveto", src, dest, "--transfers=1", "--checkers=2"}
+	args = append(args, moveArgs...)
 	rcExecCmd(args...)
 }
 
 func rcExecCmd(args ...string) {
-	args = append(args, cmdArgs...)
 	cmd := exec.Command("rclone", args...)
 
 	var exitError *exec.ExitError
