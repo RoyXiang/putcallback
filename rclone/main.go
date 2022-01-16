@@ -40,13 +40,11 @@ func init() {
 		fmt.Sprintf("--transfers=%d", rcGlobalConfig.Transfers),
 		fmt.Sprintf("--checkers=%d", rcGlobalConfig.Checkers),
 		fmt.Sprintf("--min-size=%db", rcGlobalConfig.MultiThreadCutoff),
-		"--delete-empty-src-dirs",
 	}
 	smallFileArgs = []string{
 		fmt.Sprintf("--transfers=%d", rcGlobalConfig.Transfers*2),
 		fmt.Sprintf("--checkers=%d", rcGlobalConfig.Checkers*2),
 		fmt.Sprintf("--max-size=%db", rcGlobalConfig.MultiThreadCutoff-1),
-		"--delete-empty-src-dirs",
 	}
 
 	styleInEnv := strings.ToLower(os.Getenv("RENAMING_STYLE"))
