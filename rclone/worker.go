@@ -55,12 +55,8 @@ func moveFolder(folderChan <-chan *putio.FileInfo) {
 
 			src := fmt.Sprintf("%s:%s", RemoteSource, folder.FullPath)
 			dest := fmt.Sprintf("%s:%s", RemoteDestination, folder.Name)
-
-			wgFolder.Add(2)
-			rcExecCmd("mkdir", dest)
-			go rcMoveDir(src, dest, largeFileArgs...)
-			go rcMoveDir(src, dest, smallFileArgs...)
-			wgFolder.Wait()
+			rcMoveDir(src, dest, largeFileArgs...)
+			rcMoveDir(src, dest, smallFileArgs...)
 
 			if Put.DeleteFolder(folder.ID, false) {
 				notification.Send(fmt.Sprintf("%s moved", folder.Name))

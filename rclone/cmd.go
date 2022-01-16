@@ -21,7 +21,6 @@ func rcDumpConfig() map[string]RemoteConfig {
 }
 
 func rcMoveDir(src, dest string, arg ...string) {
-	defer wgFolder.Done()
 	args := []string{"move", src, dest}
 	args = append(args, arg...)
 	args = append(args, moveArgs...)

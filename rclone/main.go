@@ -23,7 +23,6 @@ var (
 	folderChan chan *putio.FileInfo
 	mu         sync.Mutex
 	wg         sync.WaitGroup
-	wgFolder   sync.WaitGroup
 
 	Put *putio.Put
 )
