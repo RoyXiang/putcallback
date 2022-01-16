@@ -50,19 +50,23 @@ func worker(fileChan <-chan *putio.FileInfo) {
 func moveFolder(folderChan <-chan *putio.FileInfo) {
 	defer wg.Done()
 	for folder := range folderChan {
-		log.Printf("Moving folder %s...", folder.Name)
+		if folder.Size > 0 {
+			log.Printf("Moving folder %s...", folder.Name)
 
-		src := fmt.Sprintf("%s:%s", RemoteSource, folder.FullPath)
-		dest := fmt.Sprintf("%s:%s", RemoteDestination, folder.Name)
+			src := fmt.Sprintf("%s:%s", RemoteSource, folder.FullPath)
+			dest := fmt.Sprintf("%s:%s", RemoteDestination, folder.Name)
 
-		wgFolder.Add(2)
-		rcExecCmd("mkdir", dest)
-		go rcMoveDir(src, dest, largeFileArgs...)
-		go rcMoveDir(src, dest, smallFileArgs...)
-		wgFolder.Wait()
+			wgFolder.Add(2)
+			rcExecCmd("mkdir", dest)
+			go rcMoveDir(src, dest, largeFileArgs...)
+			go rcMoveDir(src, dest, smallFileArgs...)
+			wgFolder.Wait()
+			Put.DeleteFolder(folder.ID, false)
 
-		rcExecCmd("rmdir", src)
-		notification.Send(fmt.Sprintf("%s moved", folder.Name))
+			notification.Send(fmt.Sprintf("%s moved", folder.Name))
+		} else {
+			Put.DeleteFolder(folder.ID, true)
+		}
 	}
 }
 
