@@ -61,9 +61,12 @@ func moveFolder(folderChan <-chan *putio.FileInfo) {
 			go rcMoveDir(src, dest, largeFileArgs...)
 			go rcMoveDir(src, dest, smallFileArgs...)
 			wgFolder.Wait()
-			Put.DeleteFolder(folder.ID, false)
 
-			notification.Send(fmt.Sprintf("%s moved", folder.Name))
+			if Put.DeleteFolder(folder.ID, false) {
+				notification.Send(fmt.Sprintf("%s moved", folder.Name))
+			} else {
+				SendFileIdToWorker(folder.ID)
+			}
 		} else {
 			Put.DeleteFolder(folder.ID, true)
 		}

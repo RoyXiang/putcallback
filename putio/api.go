@@ -31,13 +31,14 @@ func (put *Put) GetFileInfo(id int64) *FileInfo {
 	}
 }
 
-func (put *Put) DeleteFolder(id int64, force bool) {
+func (put *Put) DeleteFolder(id int64, force bool) bool {
 	ctx := context.Background()
 	if !force {
 		file, err := put.Client.Files.Get(ctx, id)
 		if err != nil || !file.IsDir() || file.Size > 0 {
-			return
+			return false
 		}
 	}
-	_ = put.Client.Files.Delete(ctx, id)
+	err := put.Client.Files.Delete(ctx, id)
+	return err == nil
 }
