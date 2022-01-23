@@ -134,7 +134,7 @@ func ParseEpisodeInfo(filename string) *EpisodeInfo {
 		season, _ := strconv.Atoi(matches[1])
 		if season < 100 {
 			info.Season = season
-			if secondLastElem == "PART" {
+			if secondLastElem == "PART" || secondLastElem == "SEASON" {
 				elems = elems[:lenElems-2]
 			} else {
 				elems = elems[:lenElems-1]
