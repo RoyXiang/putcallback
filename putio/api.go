@@ -22,9 +22,23 @@ func (put *Put) GetFileInfo(id int64) *FileInfo {
 		folderId = folder.ParentID
 	}
 	return &FileInfo{
+		ID:          file.ID,
 		Name:        file.Name,
 		IsDir:       file.IsDir(),
+		Size:        file.Size,
 		FullPath:    fullPath,
 		ContentType: file.ContentType,
 	}
+}
+
+func (put *Put) DeleteFolder(id int64, force bool) bool {
+	ctx := context.Background()
+	if !force {
+		file, err := put.Client.Files.Get(ctx, id)
+		if err != nil || !file.IsDir() || file.Size > 0 {
+			return false
+		}
+	}
+	err := put.Client.Files.Delete(ctx, id)
+	return err == nil
 }

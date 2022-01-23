@@ -16,8 +16,10 @@ type Put struct {
 type SortedTransfers []put.Transfer
 
 type FileInfo struct {
+	ID          int64
 	Name        string
 	IsDir       bool
+	Size        int64
 	FullPath    string
 	ContentType string
 }
