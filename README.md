@@ -5,14 +5,14 @@ It will move files from Put.io to any other storage supported by [rclone](https:
 
 ## Prerequisites
 
-1. Please ensure `rclone` is installed
+1. Please ensure `rclone` is installed (version >= 1.52.0)
 2. Please ensure both `src` and `dest` are configured as valid rclone remotes,
    and `src` should be a remote whose type is `putio`.
 
 ## Install
 
 ```sh
-go install github.com/RoyXiang/putcallback@latest
+env CGO_ENABLED=0 go install github.com/RoyXiang/putcallback@latest
 ```
 
 ## Usage
