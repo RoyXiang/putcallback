@@ -1,6 +1,7 @@
 package notification
 
 import (
+	"log"
 	"os"
 	"strconv"
 	"time"
@@ -10,9 +11,8 @@ import (
 )
 
 var (
-	isPushoverEnabled bool
-	pushoverApp       *pushover.Pushover
-	recipient         *pushover.Recipient
+	pushoverApp *pushover.Pushover
+	recipient   *pushover.Recipient
 
 	tgBotApi *tgbotapi.BotAPI
 	tgChatId int64
@@ -22,9 +22,9 @@ func init() {
 	appToken := os.Getenv("PUSHOVER_APP_TOKEN")
 	userToken := os.Getenv("PUSHOVER_USER_TOKEN")
 	if appToken != "" && userToken != "" {
-		isPushoverEnabled = true
 		pushoverApp = pushover.New(appToken)
 		recipient = pushover.NewRecipient(userToken)
+		log.Print("Pushover notification enabled")
 	}
 
 	var err error
@@ -33,13 +33,17 @@ func init() {
 	if botToken != "" && telegramChatId != "" {
 		tgChatId, err = strconv.ParseInt(telegramChatId, 10, 64)
 		if err == nil {
-			tgBotApi, _ = tgbotapi.NewBotAPI(botToken)
+			tgBotApi, err = tgbotapi.NewBotAPI(botToken)
+			if err == nil {
+				log.Print("Telegram bot notification enabled")
+			}
 		}
 	}
 }
 
 func Send(message string) {
-	if isPushoverEnabled {
+	log.Print(message)
+	if pushoverApp != nil {
 		msg := &pushover.Message{
 			Title:     "Put.io",
 			Message:   message,

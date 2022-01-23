@@ -8,12 +8,14 @@ import (
 	"strings"
 
 	"github.com/RoyXiang/putcallback/notification"
+	"github.com/RoyXiang/putcallback/putio"
 	"github.com/chonla/roman-number-go"
 )
 
 var (
 	reFilename = regexp.MustCompile(`^(\[.+?])[\[ ](.+?)[] ]?-?[\[ ](E|EP|SP)?([0-9]{1,3}(?:\.[0-9])?)(?:[vV]([0-9]))?(?:\((OAD|OVA)\))?[] ]((?:\[?END[] ])?[\[(].*)$`)
 	reSeason   = regexp.MustCompile(`^S?([0-9]+)$`)
+	reOrdinal  = regexp.MustCompile(`^([0-9]+)(?:ST|ND|RD|TH)$`)
 	reDigits   = regexp.MustCompile(`(\b|-)[0-9]+(\b|-)`)
 	romanLib   = roman.NewRoman()
 )
@@ -22,61 +24,75 @@ func SendFileIdToWorker(fileId int64) {
 	mu.Lock()
 	defer mu.Unlock()
 
-	name, isDir := Put.GetFileInfo(fileId)
-	if name == "" {
+	fileInfo := Put.GetFileInfo(fileId)
+	if fileInfo == nil {
 		return
 	}
 	go Put.CleanupTransfers()
-	if isDir {
-		folderChan <- name
+
+	if !strings.HasPrefix(fileInfo.FullPath, Put.DefaultDownloadFolder) {
+		notification.Send(fmt.Sprintf("%s downloaded", fileInfo.Name))
+	} else if fileInfo.IsDir {
+		folderChan <- fileInfo
 	} else {
-		fileChan <- name
+		fileChan <- fileInfo
 	}
 }
 
-func worker(fileChan <-chan string) {
+func worker(fileChan <-chan *putio.FileInfo) {
 	defer wg.Done()
-	for filename := range fileChan {
+	for fileInfo := range fileChan {
 		wg.Add(1)
-		go moveFile(filename)
+		go moveFile(fileInfo)
 	}
 }
 
-func moveFolder(folderChan <-chan string) {
+func moveFolder(folderChan <-chan *putio.FileInfo) {
 	defer wg.Done()
 	for folder := range folderChan {
-		log.Printf("Moving folder %s...", folder)
+		if folder.Size > 0 {
+			log.Printf("Moving folder %s...", folder.Name)
 
-		src := fmt.Sprintf("%s:%s", RemoteSource, folder)
-		dest := fmt.Sprintf("%s:%s", RemoteDestination, folder)
-		rcMove(src, dest, "--transfers=20", "--checkers=30", "--max-size=250M")
-		rcMove(src, dest, "--transfers=5", "--checkers=10", "--multi-thread-streams=10", "--min-size=250M", "--tpslimit=100", "--tpslimit-burst=100")
-		rcRemoveDir(src)
+			src := fmt.Sprintf("%s:%s", RemoteSource, folder.FullPath)
+			dest := fmt.Sprintf("%s:%s", RemoteDestination, folder.Name)
+			rcMoveDir(src, dest, largeFileArgs...)
+			rcMoveDir(src, dest, smallFileArgs...)
 
-		notification.Send(fmt.Sprintf("%s finished", folder))
+			if Put.DeleteFolder(folder.ID, false) {
+				notification.Send(fmt.Sprintf("%s moved", folder.Name))
+			} else {
+				SendFileIdToWorker(folder.ID)
+			}
+		} else {
+			Put.DeleteFolder(folder.ID, true)
+		}
 	}
 }
 
-func moveFile(filename string) {
+func moveFile(file *putio.FileInfo) {
 	defer wg.Done()
 
-	log.Printf("Moving file %s...", filename)
+	log.Printf("Moving file %s...", file.Name)
 
-	var newFilename string
-	switch renamingStyle {
-	case RenamingStyleAnime:
-		newFilename = RenameFileInAnimeStyle(filename)
-	case RenamingStyleTv:
-		newFilename = RenameFileInTvStyle(filename)
-	default:
-		newFilename = filename
+	newFilename := file.Name
+	if strings.HasPrefix(file.ContentType, putio.ContentTypeVideo) {
+		switch renamingStyle {
+		case RenamingStyleAnime:
+			newFilename = RenameFileInAnimeStyle(file.Name)
+		case RenamingStyleTv:
+			newFilename = RenameFileInTvStyle(file.Name)
+		}
 	}
 
-	src := fmt.Sprintf("%s:%s", RemoteSource, filename)
+	src := fmt.Sprintf("%s:%s", RemoteSource, file.FullPath)
 	dest := fmt.Sprintf("%s:%s", RemoteDestination, newFilename)
-	rcMoveTo(src, dest, "--transfers=1", "--checkers=2", "--multi-thread-streams=10", "--tpslimit=100", "--tpslimit-burst=100")
+	rcMoveFile(src, dest)
 
-	notification.Send(fmt.Sprintf("%s finished", filename))
+	if file.Name == newFilename {
+		notification.Send(fmt.Sprintf("%s moved", file.Name))
+	} else {
+		notification.Send(fmt.Sprintf("%s moved and renamed", file.Name))
+	}
 }
 
 func ParseEpisodeInfo(filename string) *EpisodeInfo {
@@ -91,7 +107,6 @@ func ParseEpisodeInfo(filename string) *EpisodeInfo {
 		Episode: matches[4],
 		Extra:   matches[7],
 	}
-
 	if matches[5] != "" {
 		info.Version, _ = strconv.Atoi(matches[5])
 	} else {
@@ -102,17 +117,32 @@ func ParseEpisodeInfo(filename string) *EpisodeInfo {
 		return r == ' ' || r == '[' || r == ']'
 	})
 	lenElems := len(elems)
-	if matches := reSeason.FindStringSubmatch(elems[lenElems-1]); matches != nil {
-		season, _ := strconv.Atoi(matches[1])
-		if lenElems >= 2 && strings.ToLower(elems[lenElems-2]) == "part" {
-			elems[lenElems-1] = romanLib.ToRoman(season)
-		} else if season < 100 {
-			info.Season = season
-			elems = elems[:lenElems-1]
-		}
+	var lastElem, secondLastElem string
+	lastElem = strings.ToUpper(elems[lenElems-1])
+	if len(elems) >= 2 {
+		secondLastElem = strings.ToUpper(elems[lenElems-2])
 	}
+
 	if matches[3] == "SP" || matches[6] != "" {
 		info.Season = 0
+	} else if lastElem == "SEASON" {
+		if matches := reOrdinal.FindStringSubmatch(secondLastElem); matches != nil {
+			season, _ := strconv.Atoi(matches[1])
+			if season < 100 {
+				info.Season = season
+				elems = elems[:lenElems-2]
+			}
+		}
+	} else if matches := reSeason.FindStringSubmatch(lastElem); matches != nil {
+		season, _ := strconv.Atoi(matches[1])
+		if season < 100 {
+			info.Season = season
+			if secondLastElem == "PART" || secondLastElem == "SEASON" {
+				elems = elems[:lenElems-2]
+			} else {
+				elems = elems[:lenElems-1]
+			}
+		}
 	}
 	info.Show = strings.Join(elems, " ")
 	return info

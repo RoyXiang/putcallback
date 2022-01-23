@@ -24,7 +24,19 @@ func TestRenameFileInAnimeStyle(t *testing.T) {
 	}
 
 	renamed = RenameFileInAnimeStyle("[Ohys-Raws] Shingeki no Kyojin The Final Season Part 2 - 12 END (NHKG 1280x720 x264 AAC JP).mp4")
-	want = "[Ohys-Raws] Shingeki no Kyojin The Final Season Part II - 12 END (NHKG 1280x720 x264 AAC JP).mp4"
+	want = "[Ohys-Raws] Shingeki no Kyojin The Final Season II - 12 END (NHKG 1280x720 x264 AAC JP).mp4"
+	if renamed != want {
+		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
+	}
+
+	renamed = RenameFileInAnimeStyle("[Ohys-Raws] Princess Connect! ReDive Season 2 - 02 (BS11 1280x720 x264 AAC).mp4")
+	want = "[Ohys-Raws] Princess Connect! ReDive II - 02 (BS11 1280x720 x264 AAC).mp4"
+	if renamed != want {
+		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
+	}
+
+	renamed = RenameFileInAnimeStyle("[Ohys-Raws] Arifureta Shokugyou de Sekai Saikyou 2nd Season - 01 (AT-X 1280x720 x264 AAC).mp4")
+	want = "[Ohys-Raws] Arifureta Shokugyou de Sekai Saikyou II - 01 (AT-X 1280x720 x264 AAC).mp4"
 	if renamed != want {
 		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
 	}

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"os/exec"
+
+	"github.com/rclone/rclone/lib/exitcode"
 )
 
 func rcDumpConfig() map[string]RemoteConfig {
@@ -18,29 +20,25 @@ func rcDumpConfig() map[string]RemoteConfig {
 	return config
 }
 
-func rcMove(src, dest string, arg ...string) {
+func rcMoveDir(src, dest string, arg ...string) {
 	args := []string{"move", src, dest}
 	args = append(args, arg...)
+	args = append(args, moveArgs...)
 	rcExecCmd(args...)
 }
 
-func rcMoveTo(src, dest string, arg ...string) {
-	args := []string{"moveto", src, dest}
-	args = append(args, arg...)
+func rcMoveFile(src, dest string) {
+	args := []string{"moveto", src, dest, "--transfers=1", "--checkers=2"}
+	args = append(args, moveArgs...)
 	rcExecCmd(args...)
-}
-
-func rcRemoveDir(dir string) {
-	rcExecCmd("rmdir", dir)
 }
 
 func rcExecCmd(args ...string) {
 	cmd := exec.Command("rclone", args...)
-	cmd.Env = cmdEnv
 
 	var exitError *exec.ExitError
 	for {
-		if err := cmd.Run(); err != nil && errors.As(err, &exitError) && exitError.ExitCode() == ErrorTemporary {
+		if err := cmd.Run(); err != nil && errors.As(err, &exitError) && exitError.ExitCode() == exitcode.RetryError {
 			continue
 		}
 		break
