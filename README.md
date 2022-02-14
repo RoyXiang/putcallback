@@ -12,7 +12,7 @@ It will move files from Put.io to any other storage supported by [rclone](https:
 ## Install
 
 ```sh
-env CGO_ENABLED=0 go install github.com/RoyXiang/putcallback@latest
+env CGO_ENABLED=0 go install -trimpath -ldflags="-s -w" github.com/RoyXiang/putcallback@latest
 ```
 
 ## Usage
