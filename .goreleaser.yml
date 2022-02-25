@@ -26,6 +26,10 @@ archives:
     name_template: "{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
     format: "binary"
 
+# Release
+release:
+  prerelease: auto
+
 # Checksum
 checksum:
   name_template: "checksums.txt"
