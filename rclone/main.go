@@ -24,12 +24,12 @@ var (
 	largeFileArgs []string
 	smallFileArgs []string
 
-	fileChan      chan *putio.FileInfo
-	folderChan    chan *putio.FileInfo
+	taskChan      chan *putio.FileInfo
 	transferQueue chan struct{}
 
-	mu sync.Mutex
-	wg sync.WaitGroup
+	callbackMu sync.Mutex
+	folderMu   sync.Mutex
+	workerWg   sync.WaitGroup
 
 	Put *putio.Put
 )
@@ -70,21 +70,18 @@ func init() {
 	accessToken := parseRCloneConfig()
 	Put = putio.New(accessToken)
 
-	fileChan = make(chan *putio.FileInfo, 1)
-	folderChan = make(chan *putio.FileInfo, Put.MaxTransfers)
+	taskChan = make(chan *putio.FileInfo, 1)
 	transferQueue = make(chan struct{}, maxTransfers)
 }
 
 func Start() {
-	wg.Add(2)
+	workerWg.Add(1)
 	go worker()
-	go moveFolder()
 }
 
 func Stop() {
-	close(fileChan)
-	close(folderChan)
-	wg.Wait()
+	close(taskChan)
+	workerWg.Wait()
 }
 
 func parseRCloneConfig() (accessToken string) {

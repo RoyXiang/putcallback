@@ -21,8 +21,8 @@ var (
 )
 
 func SendFileIdToWorker(fileId int64) {
-	mu.Lock()
-	defer mu.Unlock()
+	callbackMu.Lock()
+	defer callbackMu.Unlock()
 
 	fileInfo := Put.GetFileInfo(fileId)
 	if fileInfo == nil {
@@ -32,45 +32,50 @@ func SendFileIdToWorker(fileId int64) {
 
 	if !strings.HasPrefix(fileInfo.FullPath, Put.DefaultDownloadFolder) {
 		notification.Send(fmt.Sprintf("%s downloaded", fileInfo.Name))
-	} else if fileInfo.IsDir {
-		folderChan <- fileInfo
 	} else {
-		fileChan <- fileInfo
+		taskChan <- fileInfo
 	}
 }
 
 func worker() {
-	defer wg.Done()
-	for fileInfo := range fileChan {
-		wg.Add(1)
-		go moveFile(fileInfo)
-	}
-}
-
-func moveFolder() {
-	defer wg.Done()
-	for folder := range folderChan {
-		if folder.Size > 0 {
-			log.Printf("Moving folder %s...", folder.Name)
-
-			src := fmt.Sprintf("%s:%s", RemoteSource, folder.FullPath)
-			dest := fmt.Sprintf("%s:%s", RemoteDestination, folder.Name)
-			rcMoveDir(src, dest, largeFileTransfers*2, largeFileArgs...)
-			rcMoveDir(src, dest, smallFileTransfers, smallFileArgs...)
-
-			if Put.DeleteFolder(folder.ID, false) {
-				notification.Send(fmt.Sprintf("%s moved", folder.Name))
-			} else {
-				SendFileIdToWorker(folder.ID)
-			}
+	defer workerWg.Done()
+	for fileInfo := range taskChan {
+		workerWg.Add(1)
+		if fileInfo.IsDir {
+			go moveFolder(fileInfo)
 		} else {
-			Put.DeleteFolder(folder.ID, true)
+			go moveFile(fileInfo)
 		}
 	}
 }
 
+func moveFolder(folder *putio.FileInfo) {
+	folderMu.Lock()
+	defer func() {
+		workerWg.Done()
+		folderMu.Unlock()
+	}()
+
+	if folder.Size > 0 {
+		log.Printf("Moving folder %s...", folder.Name)
+
+		src := fmt.Sprintf("%s:%s", RemoteSource, folder.FullPath)
+		dest := fmt.Sprintf("%s:%s", RemoteDestination, folder.Name)
+		rcMoveDir(src, dest, largeFileTransfers*2, largeFileArgs...)
+		rcMoveDir(src, dest, smallFileTransfers, smallFileArgs...)
+
+		if Put.DeleteFolder(folder.ID, false) {
+			notification.Send(fmt.Sprintf("%s moved", folder.Name))
+		} else {
+			taskChan <- folder
+		}
+	} else {
+		Put.DeleteFolder(folder.ID, true)
+	}
+}
+
 func moveFile(file *putio.FileInfo) {
-	defer wg.Done()
+	defer workerWg.Done()
 
 	log.Printf("Moving file %s...", file.Name)
 
