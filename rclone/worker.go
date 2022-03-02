@@ -39,7 +39,7 @@ func SendFileIdToWorker(fileId int64) {
 	}
 }
 
-func worker(fileChan <-chan *putio.FileInfo) {
+func worker() {
 	defer wg.Done()
 	for fileInfo := range fileChan {
 		wg.Add(1)
@@ -47,7 +47,7 @@ func worker(fileChan <-chan *putio.FileInfo) {
 	}
 }
 
-func moveFolder(folderChan <-chan *putio.FileInfo) {
+func moveFolder() {
 	defer wg.Done()
 	for folder := range folderChan {
 		if folder.Size > 0 {
@@ -55,8 +55,8 @@ func moveFolder(folderChan <-chan *putio.FileInfo) {
 
 			src := fmt.Sprintf("%s:%s", RemoteSource, folder.FullPath)
 			dest := fmt.Sprintf("%s:%s", RemoteDestination, folder.Name)
-			rcMoveDir(src, dest, largeFileArgs...)
-			rcMoveDir(src, dest, smallFileArgs...)
+			rcMoveDir(src, dest, largeFileTransfers*2, largeFileArgs...)
+			rcMoveDir(src, dest, smallFileTransfers, smallFileArgs...)
 
 			if Put.DeleteFolder(folder.ID, false) {
 				notification.Send(fmt.Sprintf("%s moved", folder.Name))
@@ -86,7 +86,11 @@ func moveFile(file *putio.FileInfo) {
 
 	src := fmt.Sprintf("%s:%s", RemoteSource, file.FullPath)
 	dest := fmt.Sprintf("%s:%s", RemoteDestination, newFilename)
-	rcMoveFile(src, dest)
+	if file.Size < multiThreadCutoff {
+		rcMoveFile(src, dest, 1)
+	} else {
+		rcMoveFile(src, dest, 2)
+	}
 
 	if file.Name == newFilename {
 		notification.Send(fmt.Sprintf("%s moved", file.Name))

@@ -15,35 +15,47 @@ import (
 var (
 	renamingStyle string
 
+	multiThreadCutoff  int64
+	largeFileTransfers int
+	smallFileTransfers int
+	maxTransfers       int
+
 	moveArgs      []string
 	largeFileArgs []string
 	smallFileArgs []string
 
-	fileChan   chan *putio.FileInfo
-	folderChan chan *putio.FileInfo
-	mu         sync.Mutex
-	wg         sync.WaitGroup
+	fileChan      chan *putio.FileInfo
+	folderChan    chan *putio.FileInfo
+	transferQueue chan struct{}
+
+	mu sync.Mutex
+	wg sync.WaitGroup
 
 	Put *putio.Put
 )
 
 func init() {
+	rcGlobalConfig := fs.GetConfig(nil)
+	multiThreadCutoff = int64(rcGlobalConfig.MultiThreadCutoff)
+	largeFileTransfers = rcGlobalConfig.Transfers
+	smallFileTransfers = rcGlobalConfig.Transfers * 2
+	maxTransfers = smallFileTransfers + 2
+
 	moveArgs = []string{
 		"--check-first",
 		"--no-traverse",
 		"--use-mmap",
 		"--drive-pacer-min-sleep=1ms",
 	}
-	rcGlobalConfig := fs.GetConfig(nil)
 	largeFileArgs = []string{
-		fmt.Sprintf("--transfers=%d", rcGlobalConfig.Transfers),
+		fmt.Sprintf("--transfers=%d", largeFileTransfers),
 		fmt.Sprintf("--checkers=%d", rcGlobalConfig.Checkers),
-		fmt.Sprintf("--min-size=%db", rcGlobalConfig.MultiThreadCutoff),
+		fmt.Sprintf("--min-size=%db", multiThreadCutoff),
 	}
 	smallFileArgs = []string{
-		fmt.Sprintf("--transfers=%d", rcGlobalConfig.Transfers*2),
+		fmt.Sprintf("--transfers=%d", smallFileTransfers),
 		fmt.Sprintf("--checkers=%d", rcGlobalConfig.Checkers*2),
-		fmt.Sprintf("--max-size=%db", rcGlobalConfig.MultiThreadCutoff-1),
+		fmt.Sprintf("--max-size=%db", multiThreadCutoff-1),
 	}
 
 	styleInEnv := strings.ToLower(os.Getenv("RENAMING_STYLE"))
@@ -60,9 +72,13 @@ func init() {
 
 	fileChan = make(chan *putio.FileInfo, 1)
 	folderChan = make(chan *putio.FileInfo, Put.MaxTransfers)
+	transferQueue = make(chan struct{}, maxTransfers)
+}
+
+func Start() {
 	wg.Add(2)
-	go worker(fileChan)
-	go moveFolder(folderChan)
+	go worker()
+	go moveFolder()
 }
 
 func Stop() {

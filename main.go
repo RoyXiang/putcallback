@@ -36,6 +36,7 @@ func main() {
 	}()
 	log.Print("Server started on :1880")
 
+	rclone.Start()
 	<-done
 	rclone.Stop()
 }
