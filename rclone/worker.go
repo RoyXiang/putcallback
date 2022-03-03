@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	reFilename = regexp.MustCompile(`^(\[.+?])[\[ ](.+?)[] ]?-?[\[ ](E|EP|SP)?([0-9]{1,3}(?:\.[0-9])?)(?:[vV]([0-9]))?(?:\((OAD|OVA)\))?[] ]((?:\[?END[] ])?[\[(].*)$`)
+	reFilename = regexp.MustCompile(`^(\[.+?])[\[ ](.+?)[] ]?-?[\[ ](E|EP|SP)?([0-9]{2,3}(?:\.[0-9])?)(?:[vV]([0-9]))?(?:\((.+)\))?[] ]((?:\[?END[] ])?[\[(].*)$`)
 	reSeason   = regexp.MustCompile(`^S?([0-9]+)$`)
 	reOrdinal  = regexp.MustCompile(`^([0-9]+)(?:ST|ND|RD|TH)$`)
 	reDigits   = regexp.MustCompile(`(\b|-)[0-9]+(\b|-)`)
@@ -21,8 +21,8 @@ var (
 )
 
 func SendFileIdToWorker(fileId int64) {
-	mu.Lock()
-	defer mu.Unlock()
+	callbackMu.Lock()
+	defer callbackMu.Unlock()
 
 	fileInfo := Put.GetFileInfo(fileId)
 	if fileInfo == nil {
@@ -32,45 +32,50 @@ func SendFileIdToWorker(fileId int64) {
 
 	if !strings.HasPrefix(fileInfo.FullPath, Put.DefaultDownloadFolder) {
 		notification.Send(fmt.Sprintf("%s downloaded", fileInfo.Name))
-	} else if fileInfo.IsDir {
-		folderChan <- fileInfo
 	} else {
-		fileChan <- fileInfo
+		taskChan <- fileInfo
 	}
 }
 
-func worker(fileChan <-chan *putio.FileInfo) {
-	defer wg.Done()
-	for fileInfo := range fileChan {
-		wg.Add(1)
-		go moveFile(fileInfo)
-	}
-}
-
-func moveFolder(folderChan <-chan *putio.FileInfo) {
-	defer wg.Done()
-	for folder := range folderChan {
-		if folder.Size > 0 {
-			log.Printf("Moving folder %s...", folder.Name)
-
-			src := fmt.Sprintf("%s:%s", RemoteSource, folder.FullPath)
-			dest := fmt.Sprintf("%s:%s", RemoteDestination, folder.Name)
-			rcMoveDir(src, dest, largeFileArgs...)
-			rcMoveDir(src, dest, smallFileArgs...)
-
-			if Put.DeleteFolder(folder.ID, false) {
-				notification.Send(fmt.Sprintf("%s moved", folder.Name))
-			} else {
-				SendFileIdToWorker(folder.ID)
-			}
+func worker() {
+	defer workerWg.Done()
+	for fileInfo := range taskChan {
+		workerWg.Add(1)
+		if fileInfo.IsDir {
+			go moveFolder(fileInfo)
 		} else {
-			Put.DeleteFolder(folder.ID, true)
+			go moveFile(fileInfo)
 		}
 	}
 }
 
+func moveFolder(folder *putio.FileInfo) {
+	folderMu.Lock()
+	defer func() {
+		workerWg.Done()
+		folderMu.Unlock()
+	}()
+
+	if folder.Size > 0 {
+		log.Printf("Moving folder %s...", folder.Name)
+
+		src := fmt.Sprintf("%s:%s", RemoteSource, folder.FullPath)
+		dest := fmt.Sprintf("%s:%s", RemoteDestination, folder.Name)
+		rcMoveDir(src, dest, largeFileTransfers*2, largeFileArgs...)
+		rcMoveDir(src, dest, smallFileTransfers, smallFileArgs...)
+
+		if Put.DeleteFolder(folder.ID, false) {
+			notification.Send(fmt.Sprintf("%s moved", folder.Name))
+		} else {
+			taskChan <- folder
+		}
+	} else {
+		Put.DeleteFolder(folder.ID, true)
+	}
+}
+
 func moveFile(file *putio.FileInfo) {
-	defer wg.Done()
+	defer workerWg.Done()
 
 	log.Printf("Moving file %s...", file.Name)
 
@@ -86,7 +91,11 @@ func moveFile(file *putio.FileInfo) {
 
 	src := fmt.Sprintf("%s:%s", RemoteSource, file.FullPath)
 	dest := fmt.Sprintf("%s:%s", RemoteDestination, newFilename)
-	rcMoveFile(src, dest)
+	if file.Size < multiThreadCutoff {
+		rcMoveFile(src, dest, 1)
+	} else {
+		rcMoveFile(src, dest, 2)
+	}
 
 	if file.Name == newFilename {
 		notification.Send(fmt.Sprintf("%s moved", file.Name))

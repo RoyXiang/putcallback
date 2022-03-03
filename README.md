@@ -12,7 +12,7 @@ It will move files from Put.io to any other storage supported by [rclone](https:
 ## Install
 
 ```sh
-env CGO_ENABLED=0 go install github.com/RoyXiang/putcallback@latest
+env CGO_ENABLED=0 go install -trimpath -ldflags="-s -w" github.com/RoyXiang/putcallback@latest
 ```
 
 ## Usage
@@ -27,5 +27,5 @@ env CGO_ENABLED=0 go install github.com/RoyXiang/putcallback@latest
        * If these two are set, a notification would be sent through Telegram bot after files transferred to `dest`.
 2. Run the program. Set it up as a service by any means, e.g. systemd, nohup, supervisor, etc.
 3. Make it accessible from outside. The program listens on `:1880` by default, set up a proxy to that port.
-4. Set up callback URL on [Settings](https://app.put.io/settings/preferences) page,
-   e.g. `https://example.com/putio/callback`
+4. Set up callback URL on [Settings](https://app.put.io/account/settings/transfers/callback-url) page,
+   e.g. `https://example.com/`

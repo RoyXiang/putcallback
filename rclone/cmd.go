@@ -20,22 +20,30 @@ func rcDumpConfig() map[string]RemoteConfig {
 	return config
 }
 
-func rcMoveDir(src, dest string, arg ...string) {
+func rcMoveDir(src, dest string, transfers int, arg ...string) {
 	args := []string{"move", src, dest}
 	args = append(args, arg...)
 	args = append(args, moveArgs...)
-	rcExecCmd(args...)
+	rcExecCmd(transfers, args...)
 }
 
-func rcMoveFile(src, dest string) {
+func rcMoveFile(src, dest string, transfers int) {
 	args := []string{"moveto", src, dest, "--transfers=1", "--checkers=2"}
 	args = append(args, moveArgs...)
-	rcExecCmd(args...)
+	rcExecCmd(transfers, args...)
 }
 
-func rcExecCmd(args ...string) {
-	cmd := exec.Command("rclone", args...)
+func rcExecCmd(transfers int, args ...string) {
+	for i := 0; i < transfers; i++ {
+		transferQueue <- struct{}{}
+	}
+	defer func() {
+		for i := 0; i < transfers; i++ {
+			<-transferQueue
+		}
+	}()
 
+	cmd := exec.Command("rclone", args...)
 	var exitError *exec.ExitError
 	for {
 		if err := cmd.Run(); err != nil && errors.As(err, &exitError) && exitError.ExitCode() == exitcode.RetryError {

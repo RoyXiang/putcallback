@@ -31,11 +31,12 @@ func main() {
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		http.HandleFunc("/putio/callback", handleCallback)
+		http.HandleFunc("/", handleCallback)
 		log.Fatal(http.ListenAndServe(":1880", nil))
 	}()
 	log.Print("Server started on :1880")
 
+	rclone.Start()
 	<-done
 	rclone.Stop()
 }

@@ -70,4 +70,16 @@ func TestRenameFileInAnimeStyle(t *testing.T) {
 	if renamed != want {
 		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
 	}
+
+	renamed = RenameFileInAnimeStyle("[Pussub&VCB-Studio] White Album 2 [01][Hi10p_1080p][x264_2flac].mkv")
+	want = "[Pussub&VCB-Studio] White Album II - 01 [Hi10p_1080p][x264_2flac].mkv"
+	if renamed != want {
+		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
+	}
+
+	renamed = RenameFileInAnimeStyle("[VCB-Studio] PERSONA5 the Animation [26.5(Summary)][Ma10p_1080p][x265_flac].mkv")
+	want = "[VCB-Studio] PERSONA5 the Animation - S26.5 [Ma10p_1080p][x265_flac].mkv"
+	if renamed != want {
+		t.Errorf("New filename was incorrect, got: %s, want: %s.", renamed, want)
+	}
 }
