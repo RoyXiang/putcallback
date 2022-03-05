@@ -11,6 +11,8 @@ It will move files from Put.io to any other storage supported by [rclone](https:
 
 ## Install
 
+Download from [Releases](https://github.com/RoyXiang/putcallback/releases/latest), or build by yourself:
+
 ```sh
 env CGO_ENABLED=0 go install -trimpath -ldflags="-s -w" github.com/RoyXiang/putcallback@latest
 ```
@@ -28,4 +30,4 @@ env CGO_ENABLED=0 go install -trimpath -ldflags="-s -w" github.com/RoyXiang/putc
 2. Run the program. Set it up as a service by any means, e.g. systemd, nohup, supervisor, etc.
 3. Make it accessible from outside. The program listens on `:1880` by default, set up a proxy to that port.
 4. Set up callback URL on [Settings](https://app.put.io/account/settings/transfers/callback-url) page,
-   e.g. `https://example.com/`
+   e.g. `http://[your ip]:1880/`
