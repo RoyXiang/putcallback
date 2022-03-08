@@ -28,9 +28,14 @@ func (r *Remote) IsValid(p string) bool {
 	return strings.HasPrefix(p, r.Path)
 }
 
-func (r *Remote) FullPath(p string) string {
+func (r *Remote) FullPath(p string, ignorePath bool) string {
+	var remotePath string
 	remoteName := r.Name
-	remotePath := path.Join(r.Path, p)
+	if ignorePath {
+		remotePath = p
+	} else {
+		remotePath = path.Join(r.Path, p)
+	}
 	if remoteName != "" {
 		remoteName += ":"
 		if remotePath == "." {
@@ -84,8 +89,8 @@ func moveFolder(folder *putio.FileInfo) {
 	if folder.Size > 0 {
 		log.Printf("Moving folder %s...", folder.Name)
 
-		src := remoteSrc.FullPath(folder.FullPath)
-		dest := remoteDest.FullPath(folder.Name)
+		src := remoteSrc.FullPath(folder.FullPath, true)
+		dest := remoteDest.FullPath(folder.Name, false)
 		rcMoveDir(src, dest, largeFileTransfers*2, largeFileArgs...)
 		rcMoveDir(src, dest, smallFileTransfers, smallFileArgs...)
 
@@ -119,8 +124,8 @@ func moveFile(file *putio.FileInfo) {
 		}
 	}
 
-	src := remoteSrc.FullPath(file.FullPath)
-	dest := remoteDest.FullPath(newFilename)
+	src := remoteSrc.FullPath(file.FullPath, true)
+	dest := remoteDest.FullPath(newFilename, false)
 	if file.Size < multiThreadCutoff {
 		rcMoveFile(src, dest, 1)
 	} else {
