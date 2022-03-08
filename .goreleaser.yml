@@ -43,6 +43,6 @@ snapshot:
 changelog:
   filters:
     exclude:
-      - "^docs:"
-      - "^test:"
+      - "^docs"
+      - "^test"
       - "^Merge branch"

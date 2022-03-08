@@ -10,9 +10,15 @@ import (
 
 	"github.com/RoyXiang/putcallback/putio"
 	"github.com/rclone/rclone/fs"
+	"github.com/rclone/rclone/fs/fspath"
 )
 
 var (
+	remoteSrc  *Remote
+	remoteDest *Remote
+
+	Put *putio.Put
+
 	renamingStyle string
 
 	multiThreadCutoff  int64
@@ -30,11 +36,12 @@ var (
 	callbackMu sync.Mutex
 	folderMu   sync.Mutex
 	workerWg   sync.WaitGroup
-
-	Put *putio.Put
 )
 
 func init() {
+	accessToken := parseRCloneConfig()
+	Put = putio.New(accessToken)
+
 	rcGlobalConfig := fs.GetConfig(nil)
 	multiThreadCutoff = int64(rcGlobalConfig.MultiThreadCutoff)
 	largeFileTransfers = rcGlobalConfig.Transfers
@@ -67,9 +74,6 @@ func init() {
 		renamingStyle = RenamingStyleNone
 	}
 
-	accessToken := parseRCloneConfig()
-	Put = putio.New(accessToken)
-
 	taskChan = make(chan *putio.FileInfo, 1)
 	transferQueue = make(chan struct{}, maxTransfers)
 }
@@ -84,26 +88,50 @@ func Stop() {
 	workerWg.Wait()
 }
 
+func parseRemote(env, defaultPath string) *Remote {
+	path := os.Getenv(env)
+	if path == "" {
+		path = defaultPath
+	}
+	if parsed, err := fspath.Parse(path); err == nil {
+		return (*Remote)(&parsed)
+	}
+	return nil
+}
+
 func parseRCloneConfig() (accessToken string) {
+	remoteSrc = parseRemote("REMOTE_SRC", RemoteSource)
+	if remoteSrc == nil || remoteSrc.Name == "" {
+		log.Fatal("Invalid REMOTE_SRC value")
+	}
+	remoteDest = parseRemote("REMOTE_DEST", RemoteDestination)
+	if remoteDest == nil {
+		log.Fatal("Invalid REMOTE_DEST value")
+	}
+
 	config := rcDumpConfig()
 	if config == nil {
 		log.Fatal("Please install rclone and configure it correctly")
 	}
-	if src, ok := config[RemoteSource]; !ok {
-		log.Fatalf("Please configure %s as a rclone remote", RemoteSource)
+
+	if src, ok := config[remoteSrc.Name]; !ok {
+		log.Fatalf("Please configure REMOTE_SRC (%s) as a rclone remote", remoteSrc.Name)
 	} else if src.Type != "putio" {
-		log.Fatalf("Please ensure %s is a configuration of Put.io", RemoteSource)
+		log.Fatalf("Please ensure REMOTE_SRC (%s) is a configuration of Put.io", remoteSrc.Name)
 	} else if src.Token != "" {
 		var token RemotePutIoToken
 		if err := json.Unmarshal([]byte(src.Token), &token); err != nil {
-			log.Fatalf("Please ensure %s has a valid Put.io token", RemoteSource)
+			log.Fatalf("Please ensure REMOTE_SRC (%s) has a valid Put.io token", remoteSrc.Name)
 		}
 		accessToken = token.AccessToken
 	} else {
-		log.Fatalf("Please configure %s correctly", RemoteSource)
+		log.Fatalf("Please configure REMOTE_SRC (%s) correctly", remoteSrc.Name)
 	}
-	if _, ok := config[RemoteDestination]; !ok {
-		log.Fatalf("Please configure %s as a rclone remote", RemoteDestination)
+
+	if remoteDest.Name != "" {
+		if _, ok := config[remoteDest.Name]; !ok {
+			log.Fatalf("Please configure REMOTE_DEST (%s) as a rclone remote", remoteDest.Name)
+		}
 	}
 	return
 }

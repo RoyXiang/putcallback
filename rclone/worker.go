@@ -3,6 +3,7 @@ package rclone
 import (
 	"fmt"
 	"log"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
@@ -19,6 +20,30 @@ var (
 	reDigits   = regexp.MustCompile(`(\b|-)[0-9]+(\b|-)`)
 	romanLib   = roman.NewRoman()
 )
+
+func (r *Remote) IsValid(p string) bool {
+	if r.Path == "" {
+		return true
+	}
+	return strings.HasPrefix(p, r.Path)
+}
+
+func (r *Remote) FullPath(p string, ignorePath bool) string {
+	var remotePath string
+	remoteName := r.Name
+	if ignorePath {
+		remotePath = p
+	} else {
+		remotePath = path.Join(r.Path, p)
+	}
+	if remoteName != "" {
+		remoteName += ":"
+		if remotePath == "." {
+			remotePath = ""
+		}
+	}
+	return remoteName + remotePath
+}
 
 func SendFileIdToWorker(fileId int64) {
 	callbackMu.Lock()
@@ -56,11 +81,16 @@ func moveFolder(folder *putio.FileInfo) {
 		folderMu.Unlock()
 	}()
 
+	if !remoteSrc.IsValid(folder.FullPath) {
+		log.Printf("Folder %s skipped", folder.Name)
+		return
+	}
+
 	if folder.Size > 0 {
 		log.Printf("Moving folder %s...", folder.Name)
 
-		src := fmt.Sprintf("%s:%s", RemoteSource, folder.FullPath)
-		dest := fmt.Sprintf("%s:%s", RemoteDestination, folder.Name)
+		src := remoteSrc.FullPath(folder.FullPath, true)
+		dest := remoteDest.FullPath(folder.Name, false)
 		rcMoveDir(src, dest, largeFileTransfers*2, largeFileArgs...)
 		rcMoveDir(src, dest, smallFileTransfers, smallFileArgs...)
 
@@ -77,7 +107,12 @@ func moveFolder(folder *putio.FileInfo) {
 func moveFile(file *putio.FileInfo) {
 	defer workerWg.Done()
 
-	log.Printf("Moving file %s...", file.Name)
+	if remoteSrc.IsValid(file.FullPath) {
+		log.Printf("Moving file %s...", file.Name)
+	} else {
+		log.Printf("File %s skipped", file.Name)
+		return
+	}
 
 	newFilename := file.Name
 	if strings.HasPrefix(file.ContentType, putio.ContentTypeVideo) {
@@ -89,8 +124,8 @@ func moveFile(file *putio.FileInfo) {
 		}
 	}
 
-	src := fmt.Sprintf("%s:%s", RemoteSource, file.FullPath)
-	dest := fmt.Sprintf("%s:%s", RemoteDestination, newFilename)
+	src := remoteSrc.FullPath(file.FullPath, true)
+	dest := remoteDest.FullPath(newFilename, false)
 	if file.Size < multiThreadCutoff {
 		rcMoveFile(src, dest, 1)
 	} else {
