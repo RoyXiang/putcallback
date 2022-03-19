@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/RoyXiang/putcallback/notification"
 	"github.com/RoyXiang/putcallback/putio"
@@ -55,11 +56,7 @@ func SendFileIdToWorker(fileId int64) {
 	}
 	go Put.CleanupTransfers()
 
-	if !strings.HasPrefix(fileInfo.FullPath, Put.DefaultDownloadFolder) {
-		notification.Send(fmt.Sprintf("%s downloaded", fileInfo.Name))
-	} else {
-		taskChan <- fileInfo
-	}
+	taskChan <- fileInfo
 }
 
 func worker() {
@@ -74,6 +71,19 @@ func worker() {
 	}
 }
 
+func checkBeforeTransfer(info *putio.FileInfo) bool {
+	msg := fmt.Sprintf("%s downloaded", info.Name)
+	if !remoteSrc.IsValid(info.FullPath) {
+		notification.Send(msg)
+		return false
+	}
+	if delayBeforeTransfer > 0 {
+		notification.Send(fmt.Sprintf("%s, transfer will begin in %s", msg, delayBeforeTransfer))
+		time.Sleep(delayBeforeTransfer)
+	}
+	return true
+}
+
 func moveFolder(folder *putio.FileInfo) {
 	folderMu.Lock()
 	defer func() {
@@ -81,7 +91,7 @@ func moveFolder(folder *putio.FileInfo) {
 		folderMu.Unlock()
 	}()
 
-	if !remoteSrc.IsValid(folder.FullPath) {
+	if !checkBeforeTransfer(folder) {
 		log.Printf("Folder %s skipped", folder.Name)
 		return
 	}
@@ -107,7 +117,7 @@ func moveFolder(folder *putio.FileInfo) {
 func moveFile(file *putio.FileInfo) {
 	defer workerWg.Done()
 
-	if remoteSrc.IsValid(file.FullPath) {
+	if checkBeforeTransfer(file) {
 		log.Printf("Moving file %s...", file.Name)
 	} else {
 		log.Printf("File %s skipped", file.Name)
