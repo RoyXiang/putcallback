@@ -56,7 +56,20 @@ func SendFileIdToWorker(fileId int64) {
 	}
 	go Put.CleanupTransfers()
 
-	taskChan <- fileInfo
+	if delayBeforeTransfer > 0 {
+		go func() {
+			notification.Send(fmt.Sprintf("%s downloaded, transfer will begin in %s", fileInfo.Name, delayBeforeTransfer))
+			time.Sleep(delayBeforeTransfer)
+			// Get file info from Put.io again in case the file was trashed
+			fileInfo = Put.GetFileInfo(fileId)
+			if fileInfo == nil {
+				return
+			}
+			taskChan <- fileInfo
+		}()
+	} else {
+		taskChan <- fileInfo
+	}
 }
 
 func worker() {
@@ -72,14 +85,9 @@ func worker() {
 }
 
 func checkBeforeTransfer(info *putio.FileInfo) bool {
-	msg := fmt.Sprintf("%s downloaded", info.Name)
 	if !remoteSrc.IsValid(info.FullPath) {
-		notification.Send(msg)
+		notification.Send(fmt.Sprintf("%s downloaded", info.Name))
 		return false
-	}
-	if delayBeforeTransfer > 0 {
-		notification.Send(fmt.Sprintf("%s, transfer will begin in %s", msg, delayBeforeTransfer))
-		time.Sleep(delayBeforeTransfer)
 	}
 	return true
 }
