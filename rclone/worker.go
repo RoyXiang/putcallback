@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	reFilename = regexp.MustCompile(`^(\[.+?])[\[ ](.+?)[] ]?-?[\[ ](E|EP|SP)?([0-9]{2,3}(?:\.[0-9])?)(?:[vV]([0-9]))?(?:\((.+)\))?[] ]((?:\[?END[] ])?[\[(].*)$`)
+	reFilename = regexp.MustCompile(`^(\[.+?])[\[ ]?(.+?)[] ]?-?[\[ ](E|EP|SP)?([0-9]{2,3}(?:\.[0-9])?)(?:[vV]([0-9]))?(?:\((.+)\))?[] ]((?:\[?END[] ])?[\[(].*)$`)
 	reSeason   = regexp.MustCompile(`^S?([0-9]+)$`)
 	reOrdinal  = regexp.MustCompile(`^([0-9]+)(?:ST|ND|RD|TH)$`)
 	reDigits   = regexp.MustCompile(`(\b|-)[0-9]+(\b|-)`)
