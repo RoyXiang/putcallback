@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/RoyXiang/putcallback/putio"
 	"github.com/rclone/rclone/fs"
@@ -19,7 +20,8 @@ var (
 
 	Put *putio.Put
 
-	renamingStyle string
+	renamingStyle       string
+	delayBeforeTransfer time.Duration
 
 	multiThreadCutoff  int64
 	largeFileTransfers int
@@ -72,6 +74,14 @@ func init() {
 		renamingStyle = RenamingStyleTv
 	} else {
 		renamingStyle = RenamingStyleNone
+	}
+
+	delayBeforeTransfer = 0
+	delayInEnv := os.Getenv("DELAY_BEFORE_TRANSFER")
+	if delayInEnv != "" {
+		if parsed, err := time.ParseDuration(delayInEnv); err == nil {
+			delayBeforeTransfer = parsed
+		}
 	}
 
 	taskChan = make(chan *putio.FileInfo, 1)

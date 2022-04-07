@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/RoyXiang/putcallback/notification"
 	"github.com/RoyXiang/putcallback/putio"
@@ -14,7 +15,7 @@ import (
 )
 
 var (
-	reFilename = regexp.MustCompile(`^(\[.+?])[\[ ](.+?)[] ]?-?[\[ ](E|EP|SP)?([0-9]{2,3}(?:\.[0-9])?)(?:[vV]([0-9]))?(?:\((.+)\))?[] ]((?:\[?END[] ])?[\[(].*)$`)
+	reFilename = regexp.MustCompile(`^(\[.+?])[\[ ]?(.+?)[] ]?-?[\[ ](E|EP|SP)?([0-9]{2,3}(?:\.[0-9])?)(?:[vV]([0-9]))?(?:\((.+)\))?[] ]((?:\[?END[] ])?[\[(].*)$`)
 	reSeason   = regexp.MustCompile(`^S?([0-9]+)$`)
 	reOrdinal  = regexp.MustCompile(`^([0-9]+)(?:ST|ND|RD|TH)$`)
 	reDigits   = regexp.MustCompile(`(\b|-)[0-9]+(\b|-)`)
@@ -55,8 +56,17 @@ func SendFileIdToWorker(fileId int64) {
 	}
 	go Put.CleanupTransfers()
 
-	if !strings.HasPrefix(fileInfo.FullPath, Put.DefaultDownloadFolder) {
-		notification.Send(fmt.Sprintf("%s downloaded", fileInfo.Name))
+	if delayBeforeTransfer > 0 {
+		go func() {
+			notification.Send(fmt.Sprintf("%s downloaded, transfer will begin in %s", fileInfo.Name, delayBeforeTransfer))
+			time.Sleep(delayBeforeTransfer)
+			// Get file info from Put.io again in case the file was trashed
+			fileInfo = Put.GetFileInfo(fileId)
+			if fileInfo == nil {
+				return
+			}
+			taskChan <- fileInfo
+		}()
 	} else {
 		taskChan <- fileInfo
 	}
@@ -74,6 +84,14 @@ func worker() {
 	}
 }
 
+func checkBeforeTransfer(info *putio.FileInfo) bool {
+	if !remoteSrc.IsValid(info.FullPath) {
+		notification.Send(fmt.Sprintf("%s downloaded", info.Name))
+		return false
+	}
+	return true
+}
+
 func moveFolder(folder *putio.FileInfo) {
 	folderMu.Lock()
 	defer func() {
@@ -81,7 +99,7 @@ func moveFolder(folder *putio.FileInfo) {
 		folderMu.Unlock()
 	}()
 
-	if !remoteSrc.IsValid(folder.FullPath) {
+	if !checkBeforeTransfer(folder) {
 		log.Printf("Folder %s skipped", folder.Name)
 		return
 	}
@@ -107,7 +125,7 @@ func moveFolder(folder *putio.FileInfo) {
 func moveFile(file *putio.FileInfo) {
 	defer workerWg.Done()
 
-	if remoteSrc.IsValid(file.FullPath) {
+	if checkBeforeTransfer(file) {
 		log.Printf("Moving file %s...", file.Name)
 	} else {
 		log.Printf("File %s skipped", file.Name)
