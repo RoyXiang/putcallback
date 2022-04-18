@@ -80,6 +80,11 @@ func TestRenameFileInAnimeStyle(t *testing.T) {
 			Filename:   "[HYSUB]Komi-san wa, Komyushou Desu.[13][GB_MP4][1920X1080].mp4",
 			AnimeStyle: "[HYSUB] Komi-san wa, Komyushou Desu. - 13 [GB_MP4][1920X1080].mp4",
 		},
+		{
+			Name:       "case 15",
+			Filename:   "[UHA-WINGS] [RPG Fudousan] [01] [x264 1080p] [CHS].mp4",
+			AnimeStyle: "[UHA-WINGS] RPG Fudousan - 01 [x264 1080p][CHS].mp4",
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.Name, func(t *testing.T) {
