@@ -158,6 +158,7 @@ func moveFile(file *putio.FileInfo) {
 }
 
 func ParseEpisodeInfo(filename string) *EpisodeInfo {
+	filename = strings.ReplaceAll(filename, "] [", "][")
 	matches := reFilename.FindStringSubmatch(filename)
 	if matches == nil {
 		return nil
