@@ -421,8 +421,8 @@ github.com/prometheus/procfs v0.7.3/go.mod h1:cz+aTbrPOrUb4q7XlbU9ygM+/jj0fzG6c1
 github.com/putdotio/go-putio v1.6.0 h1:O8VRIU48ULeEb+xb837SkDXQLifFkIRYAbayfbTGcV8=
 github.com/putdotio/go-putio v1.6.0/go.mod h1:uMqhBEWCsZkR8an5uhK1z9TRuJFaNlJlrsqYiuj2NYY=
 github.com/putdotio/go-putio/putio v0.0.0-20200123120452-16d982cac2b8/go.mod h1:bSJjRokAHHOhA+XFxplld8w2R/dXLH7Z3BZ532vhFwU=
-github.com/rclone/rclone v1.59.0 h1:ski6v+miIq1slukf3hOQXZzD/5Az+sDITTOaw9e/cmY=
-github.com/rclone/rclone v1.59.0/go.mod h1:BWvUUtzTBuUbPBINiixMAPsV2SN/lV6kzQ14YGZb0/c=
+github.com/rclone/rclone v1.59.1 h1:ygzkjbgrNLZh33Yd9/KfJSwlT5hmlpRZf4t3wJVMjsY=
+github.com/rclone/rclone v1.59.1/go.mod h1:22wVq/p6X8XGy5LW+oQDlfH8E43qt1B07FY6DBA0CdY=
 github.com/rfjakob/eme v1.1.2/go.mod h1:cVvpasglm/G3ngEfcfT/Wt0GwhkuO32pf/poW6Nyk1k=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/robertkrimen/godocdown v0.0.0-20130622164427-0bfa04905481/go.mod h1:C9WhFzY47SzYBIvzFqSvHIR6ROgDo4TtdTuRaOMjF/s=
@@ -490,7 +490,7 @@ github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.2 h1:4jaiDzPyXQvSd7D0EjG45355tLlV3VOECpq10pLC+8s=
 github.com/stretchr/testify v1.7.2/go.mod h1:R6va5+xMeoiuVRoj+gSkQ7d3FALtqAAGI1FQKckRals=
-github.com/t3rm1n4l/go-mega v0.0.0-20200416171014-ffad7fcb44b8/go.mod h1:XWL4vDyd3JKmJx+hZWUVgCNmmhZ2dTBcaNDcxH465s0=
+github.com/t3rm1n4l/go-mega v0.0.0-20220725095014-c4e0c2b5debf/go.mod h1:c+cGNU1qi9bO7ZF4IRMYk+KaZTNiQ/gQrSbyMmGFq1Q=
 github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07/go.mod h1:kDXzergiv9cbyO7IOYJZWg1U88JhDg3PB6klq9Hg2pA=
 github.com/tinylib/msgp v1.0.2/go.mod h1:+d+yLhGm8mzTaHzB+wgMYrodPfmZrzkirds8fDWklFE=
 github.com/tklauser/go-sysconf v0.3.10/go.mod h1:C8XykCvCb+Gn0oNCWPIlcb0RuglQTYaQ2hGm7jmxEFk=
