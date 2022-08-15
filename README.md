@@ -32,8 +32,6 @@ env CGO_ENABLED=0 go install -trimpath -ldflags="-s -w" github.com/RoyXiang/putc
      * If these two are set, a notification would be sent through [Pushover](https://pushover.net/) after files transferred to `dest`.
    * `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`
      * If these two are set, a notification would be sent through Telegram bot after files transferred to `dest`.
-   * `RCLONE_FILTER_FROM`
-     * Please check [the official documentation](https://rclone.org/filtering/#filter-from-read-filtering-patterns-from-a-file) for the details.
 2. Run the program. Set it up as a service by any means, e.g. systemd, nohup, supervisor, etc.
 3. Make it accessible from outside. The program listens on `:1880` by default, set up a proxy to that port.
 4. Set up callback URL on [Settings](https://app.put.io/account/settings/transfers/callback-url) page,

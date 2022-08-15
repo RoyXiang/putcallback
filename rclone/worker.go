@@ -149,7 +149,6 @@ func moveFile(file *putio.FileInfo) {
 	} else {
 		rcMoveFile(src, dest, 2)
 	}
-	Put.DeleteFile(file.ID)
 
 	if file.Name == newFilename {
 		notification.Send(fmt.Sprintf("%s moved", file.Name))
