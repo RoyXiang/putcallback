@@ -29,7 +29,7 @@ env CGO_ENABLED=0 go install -trimpath -ldflags="-s -w" github.com/RoyXiang/putc
      * If this is set, all files downloaded by single-file transfers
        would be renamed so to be identified by media systems like Plex, Emby, Jellyfin, etc.
    * `PUSHOVER_APP_TOKEN` and `PUSHOVER_USER_TOKEN`
-     * If these two are set, a notification would be sent through [Pushover]() after files transferred to `dest`.
+     * If these two are set, a notification would be sent through [Pushover](https://pushover.net/) after files transferred to `dest`.
    * `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`
      * If these two are set, a notification would be sent through Telegram bot after files transferred to `dest`.
    * `RCLONE_FILTER_FROM`
