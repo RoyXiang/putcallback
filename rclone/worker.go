@@ -112,13 +112,13 @@ func moveFolder(folder *putio.FileInfo) {
 		rcMoveDir(src, dest, largeFileTransfers*2, largeFileArgs...)
 		rcMoveDir(src, dest, smallFileTransfers, smallFileArgs...)
 
-		if Put.DeleteFolder(folder.ID) {
+		if Put.DeleteFile(folder.ID) {
 			notification.Send(fmt.Sprintf("%s moved", folder.Name))
 		} else {
 			taskChan <- folder
 		}
 	} else {
-		Put.DeleteFolder(folder.ID)
+		Put.DeleteFile(folder.ID)
 	}
 }
 
