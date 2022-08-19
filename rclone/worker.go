@@ -207,7 +207,7 @@ func ParseEpisodeInfo(filename string) *EpisodeInfo {
 			}
 		}
 	}
-	info.Show = strings.Join(elems, " ")
+	info.Show = strings.ReplaceAll(strings.Join(elems, " "), "_", " ")
 	return info
 }
 
@@ -251,5 +251,12 @@ func RenameFileInTvStyle(filename string) string {
 	if info == nil {
 		return filename
 	}
-	return fmt.Sprintf("%s - S%02dE%s - %s%s", info.Show, info.Season, info.Episode, info.Group, info.Extra)
+	extra := info.Extra
+	if strings.HasPrefix(extra, "END ") {
+		extra = strings.Replace(extra, "END ", "", 1)
+	}
+	if strings.HasPrefix(extra, "(") {
+		extra = " " + extra
+	}
+	return fmt.Sprintf("%s - S%02dE%s - %s%s", info.Show, info.Season, info.Episode, info.Group, extra)
 }
