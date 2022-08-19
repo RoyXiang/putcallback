@@ -18,6 +18,7 @@ var (
 	reFilename = regexp.MustCompile(`^(\[.+?])[\[ ]?(.+?)[] ]?-?[\[ ](E|EP|SP)?([0-9]{2,3}(?:\.[0-9])?)(?:[vV]([0-9]))?(?:\((.+)\))?[] ]((?:\[?END[] ])?[\[(].*)$`)
 	reSeason   = regexp.MustCompile(`^S?([0-9]+)$`)
 	reOrdinal  = regexp.MustCompile(`^([0-9]+)(?:ST|ND|RD|TH)$`)
+	reRoman    = regexp.MustCompile(`^[IVX]+$`)
 	reDigits   = regexp.MustCompile(`(\b|-)[0-9]+(\b|-)`)
 	romanLib   = roman.NewRoman()
 )
@@ -205,6 +206,12 @@ func ParseEpisodeInfo(filename string) *EpisodeInfo {
 			} else {
 				elems = elems[:lenElems-1]
 			}
+		}
+	} else if matches := reRoman.FindStringSubmatch(lastElem); matches != nil {
+		season := romanLib.ToNumber(lastElem)
+		if season < 100 {
+			info.Season = season
+			elems = elems[:lenElems-1]
 		}
 	}
 	info.Show = strings.ReplaceAll(strings.Join(elems, " "), "_", " ")

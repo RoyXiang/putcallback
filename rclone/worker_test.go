@@ -114,6 +114,11 @@ func TestRenameFileInTvStyle(t *testing.T) {
 			Filename: "[Ohys-Raws] Kawaii Dake ja Nai Shikimori-san - 12 END (EX 1280x720 x264 AAC).mp4",
 			TvStyle:  "Kawaii Dake ja Nai Shikimori-san - S01E12 - [Ohys-Raws] (EX 1280x720 x264 AAC).mp4",
 		},
+		{
+			Name:     "case 03",
+			Filename: "[Lilith-Raws] Overlord IV - 01 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4",
+			TvStyle:  "Overlord - S04E01 - [Lilith-Raws][Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4",
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.Name, func(t *testing.T) {
