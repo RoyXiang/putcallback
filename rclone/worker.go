@@ -110,8 +110,7 @@ func moveFolder(folder *putio.FileInfo) {
 
 		src := remoteSrc.FullPath(folder.FullPath, true)
 		dest := remoteDest.FullPath(folder.Name, false)
-		rcMoveDir(src, dest, largeFileTransfers*2, largeFileArgs...)
-		rcMoveDir(src, dest, smallFileTransfers, smallFileArgs...)
+		rcMoveDir(src, dest)
 
 		if Put.DeleteFile(folder.ID) {
 			notification.Send(fmt.Sprintf("%s moved", folder.Name))
@@ -145,11 +144,7 @@ func moveFile(file *putio.FileInfo) {
 
 	src := remoteSrc.FullPath(file.FullPath, true)
 	dest := remoteDest.FullPath(newFilename, false)
-	if file.Size < multiThreadCutoff {
-		rcMoveFile(src, dest, 1)
-	} else {
-		rcMoveFile(src, dest, 2)
-	}
+	rcMoveFile(src, dest, file.Size)
 
 	if file.Name == newFilename {
 		notification.Send(fmt.Sprintf("%s moved", file.Name))

@@ -20,17 +20,23 @@ func rcDumpConfig() map[string]RemoteConfig {
 	return config
 }
 
-func rcMoveDir(src, dest string, transfers int, arg ...string) {
-	args := []string{"move", src, dest}
-	args = append(args, arg...)
-	args = append(args, moveArgs...)
-	rcExecCmd(transfers, args...)
+func rcMoveDir(src, dest string) {
+	args := append([]string{"move", src, dest}, moveArgs...)
+
+	lArgs := append(args, largeFileArgs...)
+	rcExecCmd(largeFileTransfers*2, lArgs...)
+
+	sArgs := append(args, smallFileArgs...)
+	rcExecCmd(smallFileTransfers, sArgs...)
 }
 
-func rcMoveFile(src, dest string, transfers int) {
-	args := []string{"moveto", src, dest, "--transfers=1", "--checkers=2"}
-	args = append(args, moveArgs...)
-	rcExecCmd(transfers, args...)
+func rcMoveFile(src, dest string, filesize int64) {
+	args := append([]string{"moveto", src, dest, "--transfers=1", "--checkers=2"}, moveArgs...)
+	if filesize < multiThreadCutoff {
+		rcExecCmd(1, args...)
+	} else {
+		rcExecCmd(2, args...)
+	}
 }
 
 func rcExecCmd(transfers int, args ...string) {
