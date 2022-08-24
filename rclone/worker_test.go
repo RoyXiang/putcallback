@@ -117,7 +117,7 @@ func TestRenameFileInTvStyle(t *testing.T) {
 		{
 			Name:     "case 03",
 			Filename: "[Lilith-Raws] Overlord IV - 01 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4",
-			TvStyle:  "Overlord - S04E01 - [Lilith-Raws][Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4",
+			TvStyle:  "Overlord IV - S04E01 - [Lilith-Raws][Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4",
 		},
 	}
 	for _, c := range cases {
