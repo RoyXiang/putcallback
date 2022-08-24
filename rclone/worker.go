@@ -110,12 +110,11 @@ func moveFolder(folder *putio.FileInfo) {
 
 		src := remoteSrc.FullPath(folder.FullPath, true)
 		dest := remoteDest.FullPath(folder.Name, false)
-		rcMoveDir(src, dest)
-
-		if Put.DeleteFile(folder.ID) {
+		if rcMoveDir(src, dest) {
+			Put.DeleteFile(folder.ID)
 			notification.Send(fmt.Sprintf("%s moved", folder.Name))
 		} else {
-			taskChan <- folder
+			notification.Send(fmt.Sprintf("error occurred, %s was not moved", folder.Name))
 		}
 	} else {
 		Put.DeleteFile(folder.ID)
@@ -144,9 +143,9 @@ func moveFile(file *putio.FileInfo) {
 
 	src := remoteSrc.FullPath(file.FullPath, true)
 	dest := remoteDest.FullPath(newFilename, false)
-	rcMoveFile(src, dest, file.Size)
-
-	if file.Name == newFilename {
+	if !rcMoveFile(src, dest, file.Size) {
+		notification.Send(fmt.Sprintf("error occurred, %s was not moved", file.Name))
+	} else if file.Name == newFilename {
 		notification.Send(fmt.Sprintf("%s moved", file.Name))
 	} else {
 		notification.Send(fmt.Sprintf("%s moved and renamed", file.Name))
