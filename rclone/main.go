@@ -65,7 +65,6 @@ func init() {
 	smallFileArgs = []string{
 		fmt.Sprintf("--transfers=%d", smallFileTransfers),
 		fmt.Sprintf("--checkers=%d", rcGlobalConfig.Checkers*2),
-		fmt.Sprintf("--max-size=%db", multiThreadCutoff-1),
 	}
 
 	osEnv := os.Environ()
