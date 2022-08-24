@@ -50,6 +50,8 @@ func rcExecCmd(transfers int, args ...string) {
 	}()
 
 	cmd := exec.Command("rclone", args...)
+	cmd.Env = cmdEnv
+
 	var exitError *exec.ExitError
 	for {
 		if err := cmd.Run(); err != nil && errors.As(err, &exitError) && exitError.ExitCode() == exitcode.RetryError {

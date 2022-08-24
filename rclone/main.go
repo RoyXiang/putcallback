@@ -28,6 +28,7 @@ var (
 	smallFileTransfers int
 	maxTransfers       int
 
+	cmdEnv        []string
 	moveArgs      []string
 	largeFileArgs []string
 	smallFileArgs []string
@@ -67,20 +68,27 @@ func init() {
 		fmt.Sprintf("--max-size=%db", multiThreadCutoff-1),
 	}
 
-	styleInEnv := strings.ToLower(os.Getenv("RENAMING_STYLE"))
-	if styleInEnv == RenamingStyleAnime {
-		renamingStyle = RenamingStyleAnime
-	} else if styleInEnv == RenamingStyleTv {
-		renamingStyle = RenamingStyleTv
-	} else {
-		renamingStyle = RenamingStyleNone
-	}
-
-	delayBeforeTransfer = 0
-	delayInEnv := os.Getenv("DELAY_BEFORE_TRANSFER")
-	if delayInEnv != "" {
-		if parsed, err := time.ParseDuration(delayInEnv); err == nil {
-			delayBeforeTransfer = parsed
+	osEnv := os.Environ()
+	for _, env := range osEnv {
+		pair := strings.SplitN(env, "=", 1)
+		switch pair[0] {
+		case "RENAMING_STYLE":
+			styleInEnv := strings.ToLower(pair[1])
+			switch styleInEnv {
+			case RenamingStyleAnime, RenamingStyleTv:
+				renamingStyle = styleInEnv
+			default:
+				renamingStyle = RenamingStyleNone
+			}
+		case "DELAY_BEFORE_TRANSFER":
+			delayBeforeTransfer = 0
+			if pair[1] != "" {
+				if parsed, err := time.ParseDuration(pair[1]); err == nil {
+					delayBeforeTransfer = parsed
+				}
+			}
+		case "HOME", "RCLONE_CONFIG":
+			cmdEnv = append(cmdEnv, env)
 		}
 	}
 
