@@ -69,7 +69,7 @@ func init() {
 
 	osEnv := os.Environ()
 	for _, env := range osEnv {
-		pair := strings.SplitN(env, "=", 1)
+		pair := strings.SplitN(env, "=", 2)
 		switch pair[0] {
 		case "RENAMING_STYLE":
 			styleInEnv := strings.ToLower(pair[1])
