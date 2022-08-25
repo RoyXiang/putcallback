@@ -22,6 +22,7 @@ var (
 
 	renamingStyle       string
 	delayBeforeTransfer time.Duration
+	excludeFileTypes    []string
 
 	multiThreadCutoff  int64
 	largeFileTransfers int
@@ -85,6 +86,15 @@ func init() {
 				if parsed, err := time.ParseDuration(pair[1]); err == nil {
 					delayBeforeTransfer = parsed
 				}
+			}
+		case "EXCLUDE_FILETYPES":
+			excludeFileTypes = strings.FieldsFunc(pair[1], func(r rune) bool {
+				return r == ',' || r == '.'
+			})
+			if len(excludeFileTypes) > 0 {
+				filterArgs := fmt.Sprintf("--exclude=*.{%s}", strings.Join(excludeFileTypes, ","))
+				largeFileArgs = append(largeFileArgs, filterArgs)
+				smallFileArgs = append(smallFileArgs, filterArgs)
 			}
 		case "HOME", "RCLONE_CONFIG":
 			cmdEnv = append(cmdEnv, env)

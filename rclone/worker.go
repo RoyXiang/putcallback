@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -12,6 +13,7 @@ import (
 	"github.com/RoyXiang/putcallback/notification"
 	"github.com/RoyXiang/putcallback/putio"
 	"github.com/chonla/roman-number-go"
+	"github.com/samber/lo"
 )
 
 var (
@@ -125,6 +127,11 @@ func moveFile(file *putio.FileInfo) {
 	defer workerWg.Done()
 
 	if checkBeforeTransfer(file) {
+		if ext := filepath.Ext(file.Name); ext != "" && lo.Contains[string](excludeFileTypes, ext[1:]) {
+			Put.DeleteFile(file.ID)
+			log.Printf("File %s filtered", file.Name)
+			return
+		}
 		log.Printf("Moving file %s...", file.Name)
 	} else {
 		log.Printf("File %s skipped", file.Name)
