@@ -1,4 +1,4 @@
-package rclone
+package utils
 
 import "testing"
 
@@ -91,6 +91,40 @@ func TestRenameFileInAnimeStyle(t *testing.T) {
 			result := RenameFileInAnimeStyle(c.Filename)
 			if result != c.AnimeStyle {
 				t.Errorf("New filename was incorrect, got: %s, want: %s.", result, c.AnimeStyle)
+			}
+		})
+	}
+}
+
+func TestRenameFileInTvStyle(t *testing.T) {
+	type TestCase struct {
+		Name     string
+		Filename string
+		TvStyle  string
+	}
+
+	cases := []TestCase{
+		{
+			Name:     "case 01",
+			Filename: "[DMG][Yofukashi_no_Uta][01][1080P][GB].mp4",
+			TvStyle:  "Yofukashi no Uta - S01E01 - [DMG][1080P][GB].mp4",
+		},
+		{
+			Name:     "case 02",
+			Filename: "[Ohys-Raws] Kawaii Dake ja Nai Shikimori-san - 12 END (EX 1280x720 x264 AAC).mp4",
+			TvStyle:  "Kawaii Dake ja Nai Shikimori-san - S01E12 - [Ohys-Raws] (EX 1280x720 x264 AAC).mp4",
+		},
+		{
+			Name:     "case 03",
+			Filename: "[Lilith-Raws] Overlord IV - 01 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4",
+			TvStyle:  "Overlord IV - S04E01 - [Lilith-Raws][Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4",
+		},
+	}
+	for _, c := range cases {
+		t.Run(c.Name, func(t *testing.T) {
+			result := RenameFileInTvStyle(c.Filename)
+			if result != c.TvStyle {
+				t.Errorf("New filename was incorrect, got: %s, want: %s.", result, c.TvStyle)
 			}
 		})
 	}
