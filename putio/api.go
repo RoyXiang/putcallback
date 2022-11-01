@@ -12,14 +12,17 @@ func (put *Put) GetFileInfo(id int64) *FileInfo {
 		return nil
 	}
 	fullPath := file.Name
-	folderId := file.ParentID
-	for folderId != RootFolderId {
-		folder, err := put.Client.Files.Get(ctx, folderId)
-		if err != nil {
-			return nil
+	if file.ParentID != RootFolderId && file.ParentID == put.DefaultDownloadFolderId {
+		fullPath = fmt.Sprintf("%s/%s", put.DefaultDownloadFolder, fullPath)
+	} else {
+		for folderId := file.ParentID; folderId != RootFolderId; {
+			folder, err := put.Client.Files.Get(ctx, folderId)
+			if err != nil {
+				return nil
+			}
+			fullPath = fmt.Sprintf("%s/%s", folder.Name, fullPath)
+			folderId = folder.ParentID
 		}
-		fullPath = fmt.Sprintf("%s/%s", folder.Name, fullPath)
-		folderId = folder.ParentID
 	}
 	return &FileInfo{
 		ID:          file.ID,

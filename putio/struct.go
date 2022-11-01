@@ -7,10 +7,11 @@ import (
 )
 
 type Put struct {
-	Client                *put.Client
-	MaxTransfers          int
-	DefaultDownloadFolder string
-	mu                    sync.Mutex
+	Client                  *put.Client
+	MaxTransfers            int
+	DefaultDownloadFolderId int64
+	DefaultDownloadFolder   string
+	mu                      sync.Mutex
 }
 
 type SortedTransfers []put.Transfer
