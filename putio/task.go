@@ -74,10 +74,9 @@ func (put *Put) CleanupTransfers() {
 		if err == nil {
 			numToBeCleaned += numToBeCanceled
 		}
-	}
-
-	if numToBeCleaned > 0 {
-		_ = put.Client.Transfers.Clean(ctx)
-		log.Printf("Transfers cleaned, %d canceled.", numToBeCanceled)
+		if numToBeCleaned > 0 {
+			_ = put.Client.Transfers.Clean(ctx)
+			log.Printf("Transfers cleaned, %d canceled.", numToBeCanceled)
+		}
 	}
 }
