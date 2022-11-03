@@ -129,6 +129,21 @@ func TestRenameFileInTvStyle(t *testing.T) {
 			Filename: "[VCB-Studio] Mob Psycho 100 [01][Ma10p_1080p][x265_flac_aac].mkv",
 			TvStyle:  "Mob Psycho 100 - S01E01 - [VCB-Studio][Ma10p_1080p][x265_flac_aac].mkv",
 		},
+		{
+			Name:     "case 06",
+			Filename: "[AI-Raws] 無職転生 #01 (BD HEVC 1920x1080 yuv444p10le FLAC)[06057AC0].mkv",
+			TvStyle:  "無職転生 - S01E01 - [AI-Raws] (BD HEVC 1920x1080 yuv444p10le FLAC)[06057AC0].mkv",
+		},
+		{
+			Name:     "case 07",
+			Filename: "[AI-Raws] 無職転生 #EX (BD HEVC 1920x1080 yuv444p10le FLAC)[A489DFB8].mkv",
+			TvStyle:  "無職転生 - S00E01 - [AI-Raws] (BD HEVC 1920x1080 yuv444p10le FLAC)[A489DFB8].mkv",
+		},
+		{
+			Name:     "case 08",
+			Filename: "[UCCUSS] Hakozume ハコヅメ 第01話 「アンボックス&サンドバック ～その1～／アンボックス&サンドバック ～その2～」 (BD 1920x1080p AVC FLAC AC3).mkv",
+			TvStyle:  "Hakozume ハコヅメ - S01E01 - [UCCUSS]「アンボックス&サンドバック ～その1～／アンボックス&サンドバック ～その2～」 (BD 1920x1080p AVC FLAC AC3).mkv",
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.Name, func(t *testing.T) {

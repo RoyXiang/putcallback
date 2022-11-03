@@ -11,7 +11,7 @@ import (
 
 var (
 	reGroup    = regexp.MustCompile(`^\[.+?]`)
-	reEpisode  = regexp.MustCompile(`(?i)^\[?(EP|SP|OVA|OAD)?([0-9]+(?:\.[0-9])?)?(?:v([0-9]))?(\(.+\))?]?$`)
+	reEpisode  = regexp.MustCompile(`(?i)^\[?(?:EP|#|第)?(SP|OVA|OAD|#EX)?([0-9]+(?:\.[0-9])?)?話?(?:v([0-9]))?(\(.+\))?]?$`)
 	reSeason   = regexp.MustCompile(`^S?([0-9]+)$`)
 	reOrdinal  = regexp.MustCompile(`^([0-9]+)(?:ST|ND|RD|TH)$`)
 	reRoman    = regexp.MustCompile(`^[IVX]+$`)
@@ -54,8 +54,7 @@ func ParseEpisodeInfo(filename string, keepSeason bool) *EpisodeInfo {
 				holdParts = append(holdParts, field)
 			}
 		} else {
-			modifier := strings.ToUpper(eMatches[1])
-			if (modifier != "" && modifier != "EP") || eMatches[4] != "" {
+			if eMatches[1] != "" || eMatches[4] != "" {
 				info.Season = 0
 			} else {
 				info.Season = 1
@@ -78,6 +77,9 @@ func ParseEpisodeInfo(filename string, keepSeason bool) *EpisodeInfo {
 				holdParts = []string{field}
 			}
 		}
+	}
+	if info.Episode == "" {
+		return nil
 	}
 
 	if info.Season != 0 {
@@ -119,6 +121,9 @@ func ParseEpisodeInfo(filename string, keepSeason bool) *EpisodeInfo {
 			showParts[i] = strings.ReplaceAll(reBrackets.ReplaceAllString(part, ""), "_", " ")
 		}
 		info.Show = strings.Join(showParts, " ")
+	}
+	if info.Show == "" {
+		return nil
 	}
 	if len(holdParts) > 1 {
 		for i, part := range holdParts {
