@@ -119,6 +119,16 @@ func TestRenameFileInTvStyle(t *testing.T) {
 			Filename: "[Lilith-Raws] Overlord IV - 01 [Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4",
 			TvStyle:  "Overlord IV - S04E01 - [Lilith-Raws][Baha][WEB-DL][1080p][AVC AAC][CHT][MP4].mp4",
 		},
+		{
+			Name:     "case 04",
+			Filename: "[OPFansMaplesnow][one_piece][1000][1080p].mkv",
+			TvStyle:  "one piece - S01E1000 - [OPFansMaplesnow][1080p].mkv",
+		},
+		{
+			Name:     "case 05",
+			Filename: "[VCB-Studio] Mob Psycho 100 [01][Ma10p_1080p][x265_flac_aac].mkv",
+			TvStyle:  "Mob Psycho 100 - S01E01 - [VCB-Studio][Ma10p_1080p][x265_flac_aac].mkv",
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.Name, func(t *testing.T) {
