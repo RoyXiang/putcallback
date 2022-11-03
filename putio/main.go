@@ -21,18 +21,14 @@ func New(token string) *Put {
 	}
 
 	result := &Put{
-		Client:                  client,
-		MaxTransfers:            info.SimultaneousDownloadLimit,
-		DefaultDownloadFolderId: RootFolderId,
-		DefaultDownloadFolder:   "",
+		Client:                client,
+		MaxTransfers:          info.SimultaneousDownloadLimit,
+		DefaultDownloadFolder: "",
 	}
-	if settings, err := client.Account.Settings(ctx); err == nil {
-		result.DefaultDownloadFolderId = settings.DefaultDownloadFolder
-		if settings.DefaultDownloadFolder != RootFolderId {
-			fileInfo := result.GetFileInfo(settings.DefaultDownloadFolder)
-			if fileInfo != nil {
-				result.DefaultDownloadFolder = fmt.Sprintf("%s/", fileInfo.FullPath)
-			}
+	if settings, err := client.Account.Settings(ctx); err == nil && settings.DefaultDownloadFolder != RootFolderId {
+		fileInfo := result.GetFileInfo(settings.DefaultDownloadFolder)
+		if fileInfo != nil {
+			result.DefaultDownloadFolder = fmt.Sprintf("%s/", fileInfo.FullPath)
 		}
 	}
 	return result
