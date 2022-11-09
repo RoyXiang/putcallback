@@ -2,6 +2,7 @@ package rclone
 
 import (
 	"encoding/json"
+	"log"
 	"os/exec"
 
 	"github.com/rclone/rclone/lib/exitcode"
@@ -49,23 +50,31 @@ func rcExecCmd(transfers int, args ...string) bool {
 		}
 	}()
 
-	cmd := exec.Command("rclone", args...)
+	cmdArgs := append([]string{"--quiet"}, args...)
+	cmd := exec.Command("rclone", cmdArgs...)
 	cmd.Env = cmdEnv
 
-	shouldRetry, hasErrors := true, false
-	for shouldRetry {
-		shouldRetry, hasErrors = false, false
-		if err := cmd.Run(); err != nil {
-			hasErrors = true
+	var lastError []byte
+COMMAND:
+	for {
+		var err error
+		if lastError, err = cmd.CombinedOutput(); err != nil {
 			if exitError, ok := err.(*exec.ExitError); ok {
 				switch exitError.ExitCode() {
 				case exitcode.Success, exitcode.NoFilesTransferred:
-					hasErrors = false
+					lastError = nil
 				case exitcode.RetryError:
-					shouldRetry = true
+					lastError = nil
+					continue COMMAND
 				}
 			}
+		} else {
+			lastError = nil
 		}
+		break
 	}
-	return !hasErrors
+	if lastError != nil {
+		log.Print(string(lastError))
+	}
+	return lastError == nil
 }
