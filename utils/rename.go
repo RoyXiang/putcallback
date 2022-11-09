@@ -11,7 +11,7 @@ import (
 
 var (
 	reGroup    = regexp.MustCompile(`^\[.+?]`)
-	reEpisode  = regexp.MustCompile(`(?i)^\[?(?:EP|#|第)?(SP|OVA|OAD|EX)?([0-9]+(?:\.[0-9])?)?話?(?:v([0-9]))?(\(.+\))?]?$`)
+	reEpisode  = regexp.MustCompile(`(?i)^\[?(?:EP|#|第)?(SP|OVA|OAD|EX)?([0-9]{2,}(?:\.[0-9])?)?話?(?:v([0-9]))?(\(.+\))?]?$`)
 	reSeason   = regexp.MustCompile(`^S?([0-9]+)$`)
 	reOrdinal  = regexp.MustCompile(`^([0-9]+)(?:ST|ND|RD|TH)$`)
 	reRoman    = regexp.MustCompile(`^[IVX]+$`)
