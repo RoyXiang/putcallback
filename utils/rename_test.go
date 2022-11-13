@@ -144,6 +144,11 @@ func TestRenameFileInTvStyle(t *testing.T) {
 			Filename: "[UCCUSS] Hakozume ハコヅメ 第01話 「アンボックス&サンドバック ～その1～／アンボックス&サンドバック ～その2～」 (BD 1920x1080p AVC FLAC AC3).mkv",
 			TvStyle:  "Hakozume ハコヅメ - S01E01 - [UCCUSS]「アンボックス&サンドバック ～その1～／アンボックス&サンドバック ～その2～」 (BD 1920x1080p AVC FLAC AC3).mkv",
 		},
+		{
+			Name:     "case 09",
+			Filename: "[Ohys-Raws] Pop Team Epic 2nd - 07 (AT-X 1280x720 x264 AAC).mp4",
+			TvStyle:  "Pop Team Epic 2nd - S02E07 - [Ohys-Raws] (AT-X 1280x720 x264 AAC).mp4",
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.Name, func(t *testing.T) {
