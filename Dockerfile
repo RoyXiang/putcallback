@@ -12,10 +12,6 @@ RUN go install -v -ldflags "-s -w" -trimpath
 
 FROM gcr.io/distroless/base-debian11:nonroot
 
-LABEL \
-	org.opencontainers.image.authors="developer@royxiang.me" \
-	org.opencontainers.image.source="https://github.com/RoyXiang/putcallback"
-
 COPY --from=builder --chown=nonroot /go/bin/putcallback /usr/local/bin/
 COPY --from=rclone --chown=nonroot /usr/local/bin/rclone /usr/local/bin/
 
