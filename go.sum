@@ -23,8 +23,8 @@ github.com/putdotio/go-putio v1.7.0 h1:iL7G9O30NCiOH4FULbul/tRNWDA9LuvlsfXjBIBmR
 github.com/putdotio/go-putio v1.7.0/go.mod h1:QhjpLhn3La/ea4FeJlp1qsiaFZDC0EIO8VUe8VEKMV0=
 github.com/rclone/rclone v1.60.0 h1:TMm1Nln2f5BDkQ0HsGmeGsNRG6I188NmZpvBTgYRSu0=
 github.com/rclone/rclone v1.60.0/go.mod h1:3nqSdPt1XZtgJhgKqhmnSzoA/ZjIy1WdInsa9VMM/d4=
-github.com/samber/lo v1.34.0 h1:1ZqcyX4642t1E/4gKEfA7ycqSYMqsKYN09AVZbME+aQ=
-github.com/samber/lo v1.34.0/go.mod h1:HLeWcJRRyLKp3+/XBJvOrerCQn9mhdKMHyd7IRlgeQ8=
+github.com/samber/lo v1.35.0 h1:GlT8CV1GE+v97Y7MLF1wXvX6mjoxZ+hi61tj/ZcQwY0=
+github.com/samber/lo v1.35.0/go.mod h1:HLeWcJRRyLKp3+/XBJvOrerCQn9mhdKMHyd7IRlgeQ8=
 github.com/sirupsen/logrus v1.9.0 h1:trlNQbNUG3OdDrDil03MCb1H2o9nJ1x4/5LYw7byDE0=
 github.com/sirupsen/logrus v1.9.0/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
 github.com/spf13/pflag v1.0.5 h1:iy+VFUOCP1a+8yFto/drg2CJ5u0yRoB7fZw3DKv/JXA=
