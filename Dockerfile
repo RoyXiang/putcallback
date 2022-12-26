@@ -1,4 +1,4 @@
-FROM rclone/rclone:1.60.1 AS rclone
+FROM rclone/rclone:1.61.1 AS rclone
 
 FROM golang:1.19 AS builder
 
