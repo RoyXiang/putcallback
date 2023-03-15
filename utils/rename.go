@@ -100,7 +100,7 @@ func ParseEpisodeInfo(filename string, keepSeason bool) *EpisodeInfo {
 		if sMatches == nil {
 			break
 		}
-		seasonStr := FirstOrElse[string](func(arg string) bool {
+		seasonStr := FirstOrElse(func(arg string) bool {
 			return arg != ""
 		}, "", sMatches[2], sMatches[4], sMatches[6])
 		season, err := strconv.Atoi(seasonStr)
