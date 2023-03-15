@@ -46,3 +46,4 @@ changelog:
       - "^docs"
       - "^test"
       - "^Merge branch"
+      - "^Merge pull request"
