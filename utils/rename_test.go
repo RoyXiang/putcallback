@@ -149,6 +149,11 @@ func TestRenameFileInTvStyle(t *testing.T) {
 			Filename: "[Ohys-Raws] Pop Team Epic 2nd - 07 (AT-X 1280x720 x264 AAC).mp4",
 			TvStyle:  "Pop Team Epic 2nd - S02E07 - [Ohys-Raws] (AT-X 1280x720 x264 AAC).mp4",
 		},
+		{
+			Name:     "case 10",
+			Filename: "[UHA-WINGS&VCB-Studio] EIGHTY SIX [01][Ma10p_1080p][x265_flac_aac].mkv",
+			TvStyle:  "EIGHTY SIX - S01E01 - [UHA-WINGS&VCB-Studio][Ma10p_1080p][x265_flac_aac].mkv",
+		},
 	}
 	for _, c := range cases {
 		t.Run(c.Name, func(t *testing.T) {
