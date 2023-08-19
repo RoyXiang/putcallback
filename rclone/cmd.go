@@ -21,7 +21,7 @@ func rcDumpConfig() map[string]RemoteConfig {
 }
 
 func rcMoveDir(src, dest string) bool {
-	args := append([]string{"move", src, dest}, moveArgs...)
+	args := append([]string{"copy", src, dest}, moveArgs...)
 
 	lArgs := append(args, largeFileArgs...)
 	if !rcExecCmd(largeFileTransfers*2, lArgs...) {
