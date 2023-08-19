@@ -1,7 +1,7 @@
 # putcallback
 
 `putcallback` is a program which handles callback from [Put.io](https://put.io/).
-It will move files from Put.io to any other storage supported by [rclone](https://rclone.org/).  
+It will move files from Put.io to any other storage supported by [rclone](https://rclone.org/).
 
 ## Prerequisites
 
