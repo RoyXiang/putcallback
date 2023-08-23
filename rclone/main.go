@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -43,9 +44,6 @@ var (
 )
 
 func init() {
-	accessToken := parseRCloneConfig()
-	Put = putio.New(accessToken)
-
 	rcGlobalConfig := fs.GetConfig(nil)
 	argMultiThreadCutoff = int64(rcGlobalConfig.MultiThreadCutoff)
 	argLargeFileTransfers = rcGlobalConfig.Transfers
@@ -69,9 +67,14 @@ func init() {
 	}
 
 	osEnv := os.Environ()
+	maxTransfers := 0
 	for _, env := range osEnv {
 		pair := strings.SplitN(env, "=", 2)
 		switch pair[0] {
+		case "MAX_TRANSFERS":
+			if maxTransfersInEnv, err := strconv.Atoi(pair[1]); err == nil {
+				maxTransfers = maxTransfersInEnv
+			}
 		case "RENAMING_STYLE":
 			styleInEnv := strings.ToLower(pair[1])
 			switch styleInEnv {
@@ -100,6 +103,9 @@ func init() {
 			cmdEnv = append(cmdEnv, env)
 		}
 	}
+
+	accessToken := parseRCloneConfig()
+	Put = putio.New(accessToken, maxTransfers)
 
 	taskChan = make(chan *putio.FileInfo, 1)
 	transferQueue = make(chan struct{}, argMaxTransfers)

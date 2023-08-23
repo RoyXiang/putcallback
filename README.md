@@ -23,6 +23,7 @@ env CGO_ENABLED=0 go install -trimpath -ldflags="-s -w" github.com/RoyXiang/putc
    * `REMOTE_SRC` and `REMOTE_DEST` (default: `src:` and `dest:`)
      * If something like `rclone move putio: drive:Downloads/` is wanted,
        set `REMOTE_SRC` to `putio:` and `REMOTE_DEST` to `drive:Downloads/`
+   * `MAX_TRANSFERS` (default: the maximum number of simultaneous tasks allowed by your Put.io subscription)
    * `DELAY_BEFORE_TRANSFER` (default: `0s`)
      * Delay before moving files to the destination so that you can manipulate files on Put.io first
    * `EXCLUDE_FILETYPES` (e.g. `exe,log`)

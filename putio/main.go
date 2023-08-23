@@ -9,7 +9,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func New(token string) *Put {
+func New(token string, maxTransfers int) *Put {
 	ctx := context.Background()
 	tokenSource := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 	oauthClient := oauth2.NewClient(ctx, tokenSource)
@@ -19,10 +19,13 @@ func New(token string) *Put {
 	if err != nil || !info.AccountActive {
 		log.Fatal("You must have an active Put.io subscription")
 	}
+	if maxTransfers <= 0 || maxTransfers > info.SimultaneousDownloadLimit {
+		maxTransfers = info.SimultaneousDownloadLimit
+	}
 
 	result := &Put{
 		Client:                client,
-		MaxTransfers:          info.SimultaneousDownloadLimit,
+		MaxTransfers:          maxTransfers,
 		DefaultDownloadFolder: "",
 	}
 	if settings, err := client.Account.Settings(ctx); err == nil && settings.DefaultDownloadFolder != RootFolderId {
