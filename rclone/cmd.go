@@ -24,17 +24,17 @@ func rcCopyDir(src, dest string) bool {
 	args := append([]string{"copy", src, dest}, moveArgs...)
 
 	lArgs := append(args, largeFileArgs...)
-	if !rcExecCmd(largeFileTransfers*2, lArgs...) {
+	if !rcExecCmd(argLargeFileTransfers*2, lArgs...) {
 		return false
 	}
 
 	sArgs := append(args, smallFileArgs...)
-	return rcExecCmd(smallFileTransfers, sArgs...)
+	return rcExecCmd(argSmallFileTransfers, sArgs...)
 }
 
 func rcCopyFile(src, dest string, filesize int64) bool {
 	args := append([]string{"copyto", src, dest, "--transfers=1", "--checkers=2"}, moveArgs...)
-	if filesize < multiThreadCutoff {
+	if filesize < argMultiThreadCutoff {
 		return rcExecCmd(1, args...)
 	}
 	return rcExecCmd(2, args...)

@@ -24,10 +24,10 @@ var (
 	delayBeforeTransfer time.Duration
 	excludeFileTypes    []string
 
-	multiThreadCutoff  int64
-	largeFileTransfers int
-	smallFileTransfers int
-	maxTransfers       int
+	argMultiThreadCutoff  int64
+	argLargeFileTransfers int
+	argSmallFileTransfers int
+	argMaxTransfers       int
 
 	cmdEnv        []string
 	moveArgs      []string
@@ -47,10 +47,10 @@ func init() {
 	Put = putio.New(accessToken)
 
 	rcGlobalConfig := fs.GetConfig(nil)
-	multiThreadCutoff = int64(rcGlobalConfig.MultiThreadCutoff)
-	largeFileTransfers = rcGlobalConfig.Transfers
-	smallFileTransfers = rcGlobalConfig.Transfers * 2
-	maxTransfers = smallFileTransfers + 2
+	argMultiThreadCutoff = int64(rcGlobalConfig.MultiThreadCutoff)
+	argLargeFileTransfers = rcGlobalConfig.Transfers
+	argSmallFileTransfers = rcGlobalConfig.Transfers * 2
+	argMaxTransfers = argSmallFileTransfers + 2
 
 	moveArgs = []string{
 		"--check-first",
@@ -59,12 +59,12 @@ func init() {
 		"--drive-pacer-min-sleep=1ms",
 	}
 	largeFileArgs = []string{
-		fmt.Sprintf("--transfers=%d", largeFileTransfers),
+		fmt.Sprintf("--transfers=%d", argLargeFileTransfers),
 		fmt.Sprintf("--checkers=%d", rcGlobalConfig.Checkers),
-		fmt.Sprintf("--min-size=%db", multiThreadCutoff),
+		fmt.Sprintf("--min-size=%db", argMultiThreadCutoff),
 	}
 	smallFileArgs = []string{
-		fmt.Sprintf("--transfers=%d", smallFileTransfers),
+		fmt.Sprintf("--transfers=%d", argSmallFileTransfers),
 		fmt.Sprintf("--checkers=%d", rcGlobalConfig.Checkers*2),
 	}
 
@@ -102,7 +102,7 @@ func init() {
 	}
 
 	taskChan = make(chan *putio.FileInfo, 1)
-	transferQueue = make(chan struct{}, maxTransfers)
+	transferQueue = make(chan struct{}, argMaxTransfers)
 }
 
 func Start() {
