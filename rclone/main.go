@@ -54,7 +54,6 @@ func init() {
 		"--check-first",
 		"--no-traverse",
 		"--use-mmap",
-		"--drive-pacer-min-sleep=1ms",
 	}
 	largeFileArgs = []string{
 		fmt.Sprintf("--transfers=%d", argLargeFileTransfers),
@@ -99,8 +98,10 @@ func init() {
 				largeFileArgs = append(largeFileArgs, filterArgs)
 				smallFileArgs = append(smallFileArgs, filterArgs)
 			}
-		case "HOME", "RCLONE_CONFIG":
-			cmdEnv = append(cmdEnv, env)
+		default:
+			if pair[0] == "HOME" || strings.HasPrefix(pair[0], "RCLONE_") {
+				cmdEnv = append(cmdEnv, env)
+			}
 		}
 	}
 
