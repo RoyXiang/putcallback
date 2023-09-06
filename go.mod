@@ -9,7 +9,7 @@ require (
 	github.com/putdotio/go-putio v1.7.0
 	github.com/rclone/rclone v1.63.1
 	github.com/samber/lo v1.38.1
-	golang.org/x/oauth2 v0.11.0
+	golang.org/x/oauth2 v0.12.0
 )
 
 require (
@@ -17,8 +17,8 @@ require (
 	github.com/jzelinskie/whirlpool v0.0.0-20201016144138-0675e54bb004 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
-	golang.org/x/net v0.14.0 // indirect
-	golang.org/x/sys v0.11.0 // indirect
+	golang.org/x/net v0.15.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
