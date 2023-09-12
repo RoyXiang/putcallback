@@ -7,7 +7,7 @@ require (
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/gregdel/pushover v1.3.0
 	github.com/putdotio/go-putio v1.7.0
-	github.com/rclone/rclone v1.63.1
+	github.com/rclone/rclone v1.64.0
 	github.com/samber/lo v1.38.1
 	golang.org/x/oauth2 v0.12.0
 )
@@ -15,8 +15,8 @@ require (
 require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/jzelinskie/whirlpool v0.0.0-20201016144138-0675e54bb004 // indirect
-	github.com/sirupsen/logrus v1.9.0 // indirect
-	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
+	github.com/sirupsen/logrus v1.9.3 // indirect
+	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/net v0.15.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
