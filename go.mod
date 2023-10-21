@@ -7,7 +7,7 @@ require (
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/gregdel/pushover v1.3.0
 	github.com/putdotio/go-putio v1.7.1
-	github.com/rclone/rclone v1.64.1
+	github.com/rclone/rclone v1.64.2
 	github.com/samber/lo v1.38.1
 	golang.org/x/oauth2 v0.13.0
 )

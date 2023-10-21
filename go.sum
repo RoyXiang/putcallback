@@ -22,8 +22,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/putdotio/go-putio v1.7.1 h1:316PpOMO2a7H73foRxlpHmekeLso07et26Z00YlwQ2A=
 github.com/putdotio/go-putio v1.7.1/go.mod h1:QhjpLhn3La/ea4FeJlp1qsiaFZDC0EIO8VUe8VEKMV0=
-github.com/rclone/rclone v1.64.1 h1:nQYfh12Q9zs07MbTYvmJqW3POpw94TgjeWnkJlFZN+g=
-github.com/rclone/rclone v1.64.1/go.mod h1:qvuTiatq811sVjaBRJ8RC4Z/CeZxIGdqahz778/YGJo=
+github.com/rclone/rclone v1.64.2 h1:vF1FiMw5xRpMKRdODme+EyCiit9spcyMkZcDmZXJG5M=
+github.com/rclone/rclone v1.64.2/go.mod h1:qvuTiatq811sVjaBRJ8RC4Z/CeZxIGdqahz778/YGJo=
 github.com/samber/lo v1.38.1 h1:j2XEAqXKb09Am4ebOg31SpvzUTTs6EN3VfgeLUhPdXM=
 github.com/samber/lo v1.38.1/go.mod h1:+m/ZKRl6ClXCE2Lgf3MsQlWfh4bn1bz6CXEOxnEXnEA=
 github.com/sirupsen/logrus v1.9.3 h1:dueUQJ1C2q9oE3F7wvmSGAaVtTmUizReu6fjN8uqzbQ=
