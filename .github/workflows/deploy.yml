@@ -46,18 +46,3 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  dokku:
-    name: Deploy to dokku host
-    needs: docker
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: Build app
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: dokku
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            git:from-image ${{ secrets.DOKKU_APP }} ${{ fromJson(needs.docker.outputs.meta).tags[0] }}
