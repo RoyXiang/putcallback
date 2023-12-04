@@ -19,14 +19,12 @@ func New(token string, maxTransfers int) *Put {
 	if err != nil || !info.AccountActive {
 		log.Fatal("You must have an active Put.io subscription")
 	}
-	if maxTransfers <= 0 || maxTransfers > info.SimultaneousDownloadLimit {
-		maxTransfers = info.SimultaneousDownloadLimit
-	}
 
 	result := &Put{
-		Client:                client,
-		MaxTransfers:          maxTransfers,
-		DefaultDownloadFolder: "",
+		Client: client,
+	}
+	if maxTransfers > 0 {
+		result.MaxTransfers = maxTransfers
 	}
 	if settings, err := client.Account.Settings(ctx); err == nil && settings.DefaultDownloadFolder != RootFolderId {
 		fileInfo := result.GetFileInfo(settings.DefaultDownloadFolder)
