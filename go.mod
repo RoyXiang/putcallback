@@ -8,7 +8,7 @@ require (
 	github.com/gregdel/pushover v1.3.0
 	github.com/putdotio/go-putio v1.7.1
 	github.com/rclone/rclone v1.65.0
-	github.com/samber/lo v1.38.1
+	github.com/samber/lo v1.39.0
 	golang.org/x/oauth2 v0.15.0
 )
 
