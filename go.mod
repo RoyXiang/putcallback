@@ -10,6 +10,7 @@ require (
 	github.com/rclone/rclone v1.67.0
 	github.com/samber/lo v1.46.0
 	golang.org/x/oauth2 v0.21.0
+	golang.org/x/sync v0.7.0
 )
 
 require (

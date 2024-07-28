@@ -13,6 +13,7 @@ import (
 	"github.com/RoyXiang/putcallback/putio"
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/fspath"
+	"golang.org/x/sync/semaphore"
 )
 
 var (
@@ -26,28 +27,27 @@ var (
 	excludeFileTypes    []string
 
 	argMultiThreadCutoff  int64
-	argLargeFileTransfers int
-	argSmallFileTransfers int
-	argMaxTransfers       int
+	argLargeFileTransfers int64
+	argSmallFileTransfers int64
+	argMaxTransfers       int64
 
 	cmdEnv        []string
 	moveArgs      []string
 	largeFileArgs []string
 	smallFileArgs []string
 
-	taskChan      chan *putio.FileInfo
-	transferQueue chan struct{}
+	taskChan    chan *putio.FileInfo
+	transferSem *semaphore.Weighted
 
 	callbackMu sync.Mutex
-	folderMu   sync.Mutex
 	workerWg   sync.WaitGroup
 )
 
 func init() {
 	rcGlobalConfig := fs.GetConfig(nil)
 	argMultiThreadCutoff = int64(rcGlobalConfig.MultiThreadCutoff)
-	argLargeFileTransfers = rcGlobalConfig.Transfers
-	argSmallFileTransfers = rcGlobalConfig.Transfers * 2
+	argLargeFileTransfers = int64(rcGlobalConfig.Transfers)
+	argSmallFileTransfers = argLargeFileTransfers * 2
 	argMaxTransfers = argSmallFileTransfers + 2
 
 	moveArgs = []string{
@@ -109,7 +109,7 @@ func init() {
 	Put = putio.New(accessToken, maxTransfers)
 
 	taskChan = make(chan *putio.FileInfo, 1)
-	transferQueue = make(chan struct{}, argMaxTransfers)
+	transferSem = semaphore.NewWeighted(int64(argMaxTransfers))
 }
 
 func Start() {

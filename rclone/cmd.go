@@ -22,34 +22,20 @@ func rcDumpConfig() map[string]RemoteConfig {
 
 func rcCopyDir(src, dest string) bool {
 	args := append([]string{"copy", src, dest}, moveArgs...)
-
 	lArgs := append(args, largeFileArgs...)
-	if !rcExecCmd(argLargeFileTransfers*2, lArgs...) {
+	if !rcExecCmd(lArgs...) {
 		return false
 	}
-
 	sArgs := append(args, smallFileArgs...)
-	return rcExecCmd(argSmallFileTransfers, sArgs...)
+	return rcExecCmd(sArgs...)
 }
 
-func rcCopyFile(src, dest string, filesize int64) bool {
+func rcCopyFile(src, dest string) bool {
 	args := append([]string{"copyto", src, dest, "--transfers=1", "--checkers=2"}, moveArgs...)
-	if filesize < argMultiThreadCutoff {
-		return rcExecCmd(1, args...)
-	}
-	return rcExecCmd(2, args...)
+	return rcExecCmd(args...)
 }
 
-func rcExecCmd(transfers int, args ...string) bool {
-	for i := 0; i < transfers; i++ {
-		transferQueue <- struct{}{}
-	}
-	defer func() {
-		for i := 0; i < transfers; i++ {
-			<-transferQueue
-		}
-	}()
-
+func rcExecCmd(args ...string) bool {
 	cmdArgs := append([]string{"--quiet"}, args...)
 	cmd := exec.Command("rclone", cmdArgs...)
 	cmd.Env = cmdEnv
