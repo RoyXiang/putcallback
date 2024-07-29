@@ -26,15 +26,11 @@ var (
 	delayBeforeTransfer time.Duration
 	excludeFileTypes    []string
 
-	argMultiThreadCutoff  int64
-	argLargeFileTransfers int64
-	argSmallFileTransfers int64
-	argMaxTransfers       int64
-
 	cmdEnv        []string
 	moveArgs      []string
 	largeFileArgs []string
 	smallFileArgs []string
+	folderWeight  int64
 
 	taskChan    chan *putio.FileInfo
 	transferSem *semaphore.Weighted
@@ -45,25 +41,17 @@ var (
 
 func init() {
 	rcGlobalConfig := fs.GetConfig(nil)
-	argMultiThreadCutoff = int64(rcGlobalConfig.MultiThreadCutoff)
-	argLargeFileTransfers = int64(rcGlobalConfig.Transfers)
-	argSmallFileTransfers = argLargeFileTransfers * 2
-	argMaxTransfers = argSmallFileTransfers + 2
+	argMultiThreadCutoff := int64(rcGlobalConfig.MultiThreadCutoff)
+	argLargeFileTransfers := int64(rcGlobalConfig.Transfers)
+	argSmallFileTransfers := argLargeFileTransfers * 2
 
 	moveArgs = []string{
 		"--check-first",
 		"--no-traverse",
 		"--use-mmap",
 	}
-	largeFileArgs = []string{
-		fmt.Sprintf("--transfers=%d", argLargeFileTransfers),
-		fmt.Sprintf("--checkers=%d", rcGlobalConfig.Checkers),
-		fmt.Sprintf("--min-size=%db", argMultiThreadCutoff),
-	}
-	smallFileArgs = []string{
-		fmt.Sprintf("--transfers=%d", argSmallFileTransfers),
-		fmt.Sprintf("--checkers=%d", rcGlobalConfig.Checkers*2),
-	}
+	largeFileArgs = make([]string, 0, 4)
+	smallFileArgs = make([]string, 0, 3)
 
 	osEnv := os.Environ()
 	maxTransfers := 0
@@ -98,6 +86,15 @@ func init() {
 				largeFileArgs = append(largeFileArgs, filterArgs)
 				smallFileArgs = append(smallFileArgs, filterArgs)
 			}
+		case "RCLONE_TRANSFERS":
+			transfers, err := strconv.ParseInt(pair[1], 10, 64)
+			if err != nil {
+				break
+			}
+			if transfers > argLargeFileTransfers {
+				argSmallFileTransfers = transfers * 2
+			}
+			argLargeFileTransfers = transfers
 		default:
 			if pair[0] == "HOME" || strings.HasPrefix(pair[0], "RCLONE_") {
 				cmdEnv = append(cmdEnv, env)
@@ -108,8 +105,22 @@ func init() {
 	accessToken := parseRCloneConfig()
 	Put = putio.New(accessToken, maxTransfers)
 
+	maxWeight := argLargeFileTransfers + 1
+	folderWeight = maxWeight - 1
+	largeFileArgs = append(
+		largeFileArgs,
+		fmt.Sprintf("--min-size=%db", argMultiThreadCutoff),
+		fmt.Sprintf("--transfers=%d", argLargeFileTransfers),
+		fmt.Sprintf("--checkers=%d", argLargeFileTransfers*2),
+	)
+	smallFileArgs = append(
+		largeFileArgs,
+		fmt.Sprintf("--transfers=%d", argSmallFileTransfers),
+		fmt.Sprintf("--checkers=%d", argSmallFileTransfers*2),
+	)
+
 	taskChan = make(chan *putio.FileInfo, 1)
-	transferSem = semaphore.NewWeighted(int64(argMaxTransfers))
+	transferSem = semaphore.NewWeighted(maxWeight)
 }
 
 func Start() {

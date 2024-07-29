@@ -93,11 +93,11 @@ func moveFolder(folder *putio.FileInfo) {
 		return
 	}
 
-	if err := transferSem.Acquire(context.Background(), argSmallFileTransfers); err != nil {
+	if err := transferSem.Acquire(context.Background(), folderWeight); err != nil {
 		log.Printf("Failed acquiring semaphore while moving folder %s", folder.Name)
 		return
 	}
-	defer transferSem.Release(argSmallFileTransfers)
+	defer transferSem.Release(folderWeight)
 
 	if folder.Size > 0 {
 		log.Printf("Moving folder %s...", folder.Name)
@@ -130,17 +130,11 @@ func moveFile(file *putio.FileInfo) {
 		return
 	}
 
-	var weight int64
-	if file.Size < argMultiThreadCutoff {
-		weight = 1
-	} else {
-		weight = 2
-	}
-	if err := transferSem.Acquire(context.Background(), weight); err != nil {
+	if err := transferSem.Acquire(context.Background(), 1); err != nil {
 		log.Printf("Failed acquiring semaphore while moving file %s", file.Name)
 		return
 	}
-	defer transferSem.Release(weight)
+	defer transferSem.Release(1)
 
 	newFilename := file.Name
 	if strings.HasPrefix(file.ContentType, putio.ContentTypeVideo) {
