@@ -114,7 +114,7 @@ func init() {
 		fmt.Sprintf("--checkers=%d", argLargeFileTransfers*2),
 	)
 	smallFileArgs = append(
-		largeFileArgs,
+		smallFileArgs,
 		fmt.Sprintf("--transfers=%d", argSmallFileTransfers),
 		fmt.Sprintf("--checkers=%d", argSmallFileTransfers*2),
 	)
