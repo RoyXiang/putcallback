@@ -1,6 +1,7 @@
 package rclone
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"path"
@@ -85,23 +86,25 @@ func checkBeforeTransfer(info *putio.FileInfo) bool {
 }
 
 func moveFolder(folder *putio.FileInfo) {
-	folderMu.Lock()
-	defer func() {
-		workerWg.Done()
-		folderMu.Unlock()
-	}()
+	defer workerWg.Done()
 
 	if !checkBeforeTransfer(folder) {
 		log.Printf("Folder %s skipped", folder.Name)
 		return
 	}
 
+	if err := transferSem.Acquire(context.Background(), folderWeight); err != nil {
+		log.Printf("Failed acquiring semaphore while moving folder %s", folder.Name)
+		return
+	}
+	defer transferSem.Release(folderWeight)
+
 	if folder.Size > 0 {
 		log.Printf("Moving folder %s...", folder.Name)
 
 		src := remoteSrc.FullPath(folder.FullPath, true)
 		dest := remoteDest.FullPath(folder.Name, false)
-		if rcMoveDir(src, dest) {
+		if rcCopyDir(src, dest) {
 			Put.DeleteFile(folder.ID)
 			notification.Send(fmt.Sprintf("%s moved", folder.Name))
 		} else {
@@ -127,6 +130,12 @@ func moveFile(file *putio.FileInfo) {
 		return
 	}
 
+	if err := transferSem.Acquire(context.Background(), 1); err != nil {
+		log.Printf("Failed acquiring semaphore while moving file %s", file.Name)
+		return
+	}
+	defer transferSem.Release(1)
+
 	newFilename := file.Name
 	if strings.HasPrefix(file.ContentType, putio.ContentTypeVideo) {
 		switch renamingStyle {
@@ -139,11 +148,14 @@ func moveFile(file *putio.FileInfo) {
 
 	src := remoteSrc.FullPath(file.FullPath, true)
 	dest := remoteDest.FullPath(newFilename, false)
-	if !rcMoveFile(src, dest, file.Size) {
-		notification.Send(fmt.Sprintf("error occurred, %s was not moved", file.Name))
-	} else if file.Name == newFilename {
-		notification.Send(fmt.Sprintf("%s moved", file.Name))
+	if rcCopyFile(src, dest) {
+		Put.DeleteFile(file.ID)
+		if file.Name == newFilename {
+			notification.Send(fmt.Sprintf("%s moved", file.Name))
+		} else {
+			notification.Send(fmt.Sprintf("%s moved and renamed", file.Name))
+		}
 	} else {
-		notification.Send(fmt.Sprintf("%s moved and renamed", file.Name))
+		notification.Send(fmt.Sprintf("error occurred, %s was not moved", file.Name))
 	}
 }

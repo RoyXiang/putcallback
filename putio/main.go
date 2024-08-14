@@ -9,7 +9,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func New(token string) *Put {
+func New(token string, maxTransfers int) *Put {
 	ctx := context.Background()
 	tokenSource := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 	oauthClient := oauth2.NewClient(ctx, tokenSource)
@@ -21,9 +21,10 @@ func New(token string) *Put {
 	}
 
 	result := &Put{
-		Client:                client,
-		MaxTransfers:          info.SimultaneousDownloadLimit,
-		DefaultDownloadFolder: "",
+		Client: client,
+	}
+	if maxTransfers > 0 {
+		result.MaxTransfers = maxTransfers
 	}
 	if settings, err := client.Account.Settings(ctx); err == nil && settings.DefaultDownloadFolder != RootFolderId {
 		fileInfo := result.GetFileInfo(settings.DefaultDownloadFolder)

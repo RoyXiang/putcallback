@@ -20,36 +20,22 @@ func rcDumpConfig() map[string]RemoteConfig {
 	return config
 }
 
-func rcMoveDir(src, dest string) bool {
-	args := append([]string{"move", src, dest}, moveArgs...)
-
+func rcCopyDir(src, dest string) bool {
+	args := append([]string{"copy", src, dest}, moveArgs...)
 	lArgs := append(args, largeFileArgs...)
-	if !rcExecCmd(largeFileTransfers*2, lArgs...) {
+	if !rcExecCmd(lArgs...) {
 		return false
 	}
-
 	sArgs := append(args, smallFileArgs...)
-	return rcExecCmd(smallFileTransfers, sArgs...)
+	return rcExecCmd(sArgs...)
 }
 
-func rcMoveFile(src, dest string, filesize int64) bool {
-	args := append([]string{"moveto", src, dest, "--transfers=1", "--checkers=2"}, moveArgs...)
-	if filesize < multiThreadCutoff {
-		return rcExecCmd(1, args...)
-	}
-	return rcExecCmd(2, args...)
+func rcCopyFile(src, dest string) bool {
+	args := append([]string{"copyto", src, dest, "--transfers=1", "--checkers=2"}, moveArgs...)
+	return rcExecCmd(args...)
 }
 
-func rcExecCmd(transfers int, args ...string) bool {
-	for i := 0; i < transfers; i++ {
-		transferQueue <- struct{}{}
-	}
-	defer func() {
-		for i := 0; i < transfers; i++ {
-			<-transferQueue
-		}
-	}()
-
+func rcExecCmd(args ...string) bool {
 	cmdArgs := append([]string{"--quiet"}, args...)
 	cmd := exec.Command("rclone", cmdArgs...)
 	cmd.Env = cmdEnv

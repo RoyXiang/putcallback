@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -12,6 +13,7 @@ import (
 	"github.com/RoyXiang/putcallback/putio"
 	"github.com/rclone/rclone/fs"
 	"github.com/rclone/rclone/fs/fspath"
+	"golang.org/x/sync/semaphore"
 )
 
 var (
@@ -24,54 +26,42 @@ var (
 	delayBeforeTransfer time.Duration
 	excludeFileTypes    []string
 
-	multiThreadCutoff  int64
-	largeFileTransfers int
-	smallFileTransfers int
-	maxTransfers       int
-
 	cmdEnv        []string
 	moveArgs      []string
 	largeFileArgs []string
 	smallFileArgs []string
+	folderWeight  int64
 
-	taskChan      chan *putio.FileInfo
-	transferQueue chan struct{}
+	taskChan    chan *putio.FileInfo
+	transferSem *semaphore.Weighted
 
 	callbackMu sync.Mutex
-	folderMu   sync.Mutex
 	workerWg   sync.WaitGroup
 )
 
 func init() {
-	accessToken := parseRCloneConfig()
-	Put = putio.New(accessToken)
-
 	rcGlobalConfig := fs.GetConfig(nil)
-	multiThreadCutoff = int64(rcGlobalConfig.MultiThreadCutoff)
-	largeFileTransfers = rcGlobalConfig.Transfers
-	smallFileTransfers = rcGlobalConfig.Transfers * 2
-	maxTransfers = smallFileTransfers + 2
+	argMultiThreadCutoff := int64(rcGlobalConfig.MultiThreadCutoff)
+	argLargeFileTransfers := int64(rcGlobalConfig.Transfers)
+	argSmallFileTransfers := argLargeFileTransfers * 2
 
 	moveArgs = []string{
 		"--check-first",
 		"--no-traverse",
 		"--use-mmap",
-		"--drive-pacer-min-sleep=1ms",
 	}
-	largeFileArgs = []string{
-		fmt.Sprintf("--transfers=%d", largeFileTransfers),
-		fmt.Sprintf("--checkers=%d", rcGlobalConfig.Checkers),
-		fmt.Sprintf("--min-size=%db", multiThreadCutoff),
-	}
-	smallFileArgs = []string{
-		fmt.Sprintf("--transfers=%d", smallFileTransfers),
-		fmt.Sprintf("--checkers=%d", rcGlobalConfig.Checkers*2),
-	}
+	largeFileArgs = make([]string, 0, 4)
+	smallFileArgs = make([]string, 0, 3)
 
 	osEnv := os.Environ()
+	maxTransfers := 0
 	for _, env := range osEnv {
 		pair := strings.SplitN(env, "=", 2)
 		switch pair[0] {
+		case "MAX_TRANSFERS":
+			if maxTransfersInEnv, err := strconv.Atoi(pair[1]); err == nil {
+				maxTransfers = maxTransfersInEnv
+			}
 		case "RENAMING_STYLE":
 			styleInEnv := strings.ToLower(pair[1])
 			switch styleInEnv {
@@ -96,13 +86,41 @@ func init() {
 				largeFileArgs = append(largeFileArgs, filterArgs)
 				smallFileArgs = append(smallFileArgs, filterArgs)
 			}
-		case "HOME", "RCLONE_CONFIG":
-			cmdEnv = append(cmdEnv, env)
+		case "RCLONE_TRANSFERS":
+			transfers, err := strconv.ParseInt(pair[1], 10, 64)
+			if err != nil {
+				break
+			}
+			if transfers > argLargeFileTransfers {
+				argSmallFileTransfers = transfers * 2
+			}
+			argLargeFileTransfers = transfers
+		default:
+			if pair[0] == "HOME" || strings.HasPrefix(pair[0], "RCLONE_") {
+				cmdEnv = append(cmdEnv, env)
+			}
 		}
 	}
 
+	accessToken := parseRCloneConfig()
+	Put = putio.New(accessToken, maxTransfers)
+
+	maxWeight := argLargeFileTransfers + 1
+	folderWeight = maxWeight - 1
+	largeFileArgs = append(
+		largeFileArgs,
+		fmt.Sprintf("--min-size=%db", argMultiThreadCutoff),
+		fmt.Sprintf("--transfers=%d", argLargeFileTransfers),
+		fmt.Sprintf("--checkers=%d", argLargeFileTransfers*2),
+	)
+	smallFileArgs = append(
+		smallFileArgs,
+		fmt.Sprintf("--transfers=%d", argSmallFileTransfers),
+		fmt.Sprintf("--checkers=%d", argSmallFileTransfers*2),
+	)
+
 	taskChan = make(chan *putio.FileInfo, 1)
-	transferQueue = make(chan struct{}, maxTransfers)
+	transferSem = semaphore.NewWeighted(maxWeight)
 }
 
 func Start() {

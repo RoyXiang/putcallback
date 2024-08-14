@@ -46,6 +46,11 @@ func (put *Put) CleanupTransfers() {
 	put.mu.Lock()
 	defer put.mu.Unlock()
 
+	count := put.MaxTransfers - 1
+	if count < 0 {
+		return
+	}
+
 	ctx := context.Background()
 	transfers, err := put.Client.Transfers.List(ctx)
 	if err != nil {
@@ -53,7 +58,6 @@ func (put *Put) CleanupTransfers() {
 	}
 	sort.Sort(SortedTransfers(transfers))
 
-	count := put.MaxTransfers - 1
 	var idsToBeCanceled []int64
 	var numToBeCanceled, numToBeCleaned int
 	for _, transfer := range transfers {

@@ -12,7 +12,7 @@ import (
 var (
 	reGroup    = regexp.MustCompile(`^\[.+?]`)
 	reEpisode  = regexp.MustCompile(`(?i)^\[?(?:EP|#|第)?(SP|OVA|OAD|EX)?([0-9]{2,}(?:\.[0-9])?)?話?(?:v([0-9]))?(\(.+\))?]?$`)
-	reSeason   = regexp.MustCompile(`((?:(?i)Season |Part )?([0-9]+|[IVX]+)$)|(([0-9]+)(?:nd|rd|th)?(?:(?i) Season)?$)|(S([0-9]+)$)`)
+	reSeason   = regexp.MustCompile(`((?:(?i)Season|Part)?(?: ([0-9]+|[IVX]+))$)|(([0-9]+)(?:nd|rd|th)?(?:(?i) Season)?$)|(S([0-9]+)$)`)
 	reDigits   = regexp.MustCompile(`(\b|-)[0-9]+(\b|-)`)
 	reBrackets = regexp.MustCompile(`[\[\]]`)
 	romanLib   = roman.NewRoman()
@@ -25,6 +25,39 @@ func FirstOrElse[T any](predicate func(arg T) bool, defaultVal T, args ...T) T {
 		}
 	}
 	return defaultVal
+}
+
+func GuessSeasonFromInfo(info EpisodeInfo, keepSeason bool) (show string, season int) {
+	show = info.Show
+	season = info.Season
+	if season == 0 {
+		return
+	}
+	sMatches := reSeason.FindStringSubmatch(show)
+	if sMatches == nil {
+		return
+	}
+	seasonStr := FirstOrElse(func(arg string) bool {
+		return arg != ""
+	}, "", sMatches[2], sMatches[4], sMatches[6])
+	parsedSeason, err := strconv.Atoi(seasonStr)
+	if err != nil {
+		parsedSeason = romanLib.ToNumber(seasonStr)
+	}
+	if parsedSeason >= 100 {
+		return
+	}
+	season = parsedSeason
+	if keepSeason {
+		return
+	}
+	matchedStr := sMatches[0]
+	if matchedStr[0] != ' ' {
+		matchedStr = " " + matchedStr
+	}
+	idx := strings.LastIndex(show, matchedStr)
+	show = show[:idx]
+	return
 }
 
 func ParseEpisodeInfo(filename string, keepSeason bool) *EpisodeInfo {
@@ -95,29 +128,7 @@ func ParseEpisodeInfo(filename string, keepSeason bool) *EpisodeInfo {
 	if info.Show == "" {
 		return nil
 	}
-	for info.Season != 0 {
-		sMatches := reSeason.FindStringSubmatch(info.Show)
-		if sMatches == nil {
-			break
-		}
-		seasonStr := FirstOrElse[string](func(arg string) bool {
-			return arg != ""
-		}, "", sMatches[2], sMatches[4], sMatches[6])
-		season, err := strconv.Atoi(seasonStr)
-		if err != nil {
-			season = romanLib.ToNumber(seasonStr)
-		}
-		if season >= 100 {
-			break
-		}
-		info.Season = season
-		if keepSeason {
-			break
-		}
-		idx := strings.LastIndex(info.Show, " "+sMatches[0])
-		info.Show = info.Show[:idx]
-		break
-	}
+	info.Show, info.Season = GuessSeasonFromInfo(*info, keepSeason)
 	if len(holdParts) > 1 {
 		for i, part := range holdParts {
 			if i <= 1 {

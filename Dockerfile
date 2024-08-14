@@ -1,6 +1,6 @@
-FROM rclone/rclone:1.60.0 AS rclone
+FROM rclone/rclone:1.67.0 AS rclone
 
-FROM golang:1.19 AS builder
+FROM golang:1.21 AS builder
 
 ENV CGO_ENABLED=0
 

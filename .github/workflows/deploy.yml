@@ -15,7 +15,7 @@ jobs:
       -
         name: Docker meta
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ghcr.io/${{ github.repository_owner }}/putcallback
           flavor: |
@@ -26,38 +26,23 @@ jobs:
             type=semver,pattern={{raw}},priority=1100
       -
         name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       -
         name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       -
         name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       -
         name: Build and push
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  dokku:
-    name: Deploy to dokku host
-    needs: docker
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: Build app
-        uses: appleboy/ssh-action@v0.1.5
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: dokku
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            git:from-image ${{ secrets.DOKKU_APP }} ${{ fromJson(needs.docker.outputs.meta).tags[0] }}
