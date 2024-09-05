@@ -9,7 +9,7 @@ require (
 	github.com/putdotio/go-putio v1.7.1
 	github.com/rclone/rclone v1.67.0
 	github.com/samber/lo v1.47.0
-	golang.org/x/oauth2 v0.22.0
+	golang.org/x/oauth2 v0.23.0
 	golang.org/x/sync v0.8.0
 )
 
